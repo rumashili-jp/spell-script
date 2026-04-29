@@ -38,7 +38,7 @@
         .scroll-viewport {
             position: relative;
             flex: 1;
-            overflow-y: scroll;
+            overflow-y: auto;
             overflow-x: hidden;
         }
 
@@ -158,16 +158,12 @@
 
         .plain-content {
             background-color: rgba(255, 255, 255, 0.85);
-            height: 100%;
-            overflow-y: auto;
+            min-height: 100%;
             position: relative;
             z-index: 10;
         }
 
         /* Help specific styles */
-        .help-container {
-            scroll-behavior: smooth;
-        }
         .help-section h4 {
             color: #8b7d6b;
             font-weight: bold;
@@ -197,22 +193,6 @@
             white-space: pre-wrap;
             color: #475569;
         }
-        .help-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1rem 0;
-            font-size: 0.85rem;
-        }
-        .help-table th, .help-table td {
-            border: 1px solid #d1c7b7;
-            padding: 8px;
-            text-align: left;
-            vertical-align: top;
-        }
-        .help-table th {
-            background: #f4f1e6;
-            color: #5d544b;
-        }
         .jump-nav {
             background: #f4f1e6;
             padding: 1rem;
@@ -229,212 +209,147 @@
             margin-right: 1rem;
             margin-bottom: 0.5rem;
         }
-        .jump-link:hover {
-            color: #5d544b;
-        }
-        .op-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 10px;
-            margin-bottom: 1rem;
-        }
-        .op-card {
+
+        /* Quest Card UI */
+        .quest-card {
             background: white;
-            border: 1px solid #d1c7b7;
-            padding: 8px;
-            border-radius: 6px;
+            border: 2px solid #d1c7b7;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
         }
+        .quest-card:hover { border-color: #8b7d6b; background: #fdfaf0; }
+        .quest-card.active { border-color: #8b7d6b; box-shadow: 0 4px 12px rgba(139, 125, 107, 0.15); }
+        .quest-card.cleared { background: #f0fdf4; border-color: #86efac; }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
     <div class="max-w-3xl mx-auto">
-        <div class="flex gap-1 ml-4">
-            <button onclick="switchTab('script')" id="tab-script" class="tab-btn active px-6 py-2 rounded-t-lg border border-b-0 border-[#d1c7b7] text-sm">Script</button>
-            <button onclick="switchTab('log')" id="tab-log" class="tab-btn px-6 py-2 rounded-t-lg border border-b-0 border-[#d1c7b7] text-sm flex items-center gap-2">
+        <div class="flex gap-1 ml-4 overflow-x-auto no-scrollbar">
+            <button onclick="switchTab('quest')" id="tab-quest" class="tab-btn px-6 py-2 rounded-t-lg border border-b-0 border-[#d1c7b7] text-sm whitespace-nowrap">Quest</button>
+            <button onclick="switchTab('script')" id="tab-script" class="tab-btn active px-6 py-2 rounded-t-lg border border-b-0 border-[#d1c7b7] text-sm whitespace-nowrap">Script</button>
+            <button onclick="switchTab('log')" id="tab-log" class="tab-btn px-6 py-2 rounded-t-lg border border-b-0 border-[#d1c7b7] text-sm flex items-center gap-2 whitespace-nowrap">
                 Log <span id="log-count" class="bg-[#d1c7b7] text-[10px] px-1.5 py-0.5 rounded-full text-white hidden">0</span>
             </button>
-            <button onclick="switchTab('preview')" id="tab-preview" class="tab-btn px-6 py-2 rounded-t-lg border border-b-0 border-[#d1c7b7] text-sm">Preview</button>
-            <button onclick="switchTab('help')" id="tab-help" class="tab-btn px-6 py-2 rounded-t-lg border border-b-0 border-[#d1c7b7] text-sm">Help</button>
+            <button onclick="switchTab('preview')" id="tab-preview" class="tab-btn px-6 py-2 rounded-t-lg border border-b-0 border-[#d1c7b7] text-sm whitespace-nowrap">Preview</button>
+            <button onclick="switchTab('help')" id="tab-help" class="tab-btn px-6 py-2 rounded-t-lg border border-b-0 border-[#d1c7b7] text-sm whitespace-nowrap">Help</button>
         </div>
 
         <div class="notebook-page rounded-lg">
             <div id="main-scroll-viewport" class="scroll-viewport">
                 <div id="ruled-bg" class="ruled-bg-layer"></div>
 
+                <!-- Quest Tab Content -->
+                <div id="content-quest" class="tab-content hidden plain-content p-8">
+                    <h3 class="text-2xl font-bold border-b-2 border-[#d1c7b7] mb-6 pb-2 text-[#5d544b] text-center">⚔️ 魔法修行の試練</h3>
+                    <div id="quest-list" class="space-y-4"></div>
+                </div>
+
+                <!-- Script Tab Content -->
                 <div id="content-script" class="tab-content">
                     <div class="editor-container">
                         <div id="line-numbers" class="line-numbers"></div>
-                        <textarea id="codeInput" spellcheck="false" placeholder="ここにスクリプトを書いてね...">
-// 演算子を使って計算してみよう！
-setvar("a", 10)
-setvar("b", 5)
-
-log("たし算: " + (a + b))
-log("ひき算: " + (a - b))
-log("かけ算: " + (a * b))
-log("わり算: " + (a / b))
-
-if(a > b)
-  log("aのほうが大きいね！")
-else
-  log("bのほうが大きいか、同じくらいかな？")
-ifend
-                        </textarea>
+                        <textarea id="codeInput" spellcheck="false" placeholder="ここにスクリプトを書いてね...">// クエストを選んで魔法を唱えよう！
+log("Hello!")</textarea>
                     </div>
                 </div>
 
+                <!-- Log Tab Content -->
                 <div id="content-log" class="tab-content hidden">
                     <div id="outputLog" class="log-container">
                          <div class="log-entry text-slate-400 italic border-none">まだログはないよ。Scriptタブで「実行」してみてね。</div>
                     </div>
                 </div>
-            </div>
 
-            <div id="content-preview" class="tab-content hidden h-full plain-content flex items-center justify-center">
-                <div class="text-center">
-                    <p class="text-3xl mb-4">🖼️</p>
-                    <p class="text-slate-500">Preview機能は準備中だよ。</p>
-                </div>
-            </div>
-
-            <div id="content-help" class="tab-content hidden h-full plain-content p-8 text-slate-700 leading-relaxed help-container">
-                <h3 class="text-2xl font-bold border-b-2 border-[#d1c7b7] mb-6 pb-2 text-[#5d544b] text-center">📕 Spell-Script 魔法の入門書</h3>
-                
-                <div class="jump-nav">
-                    <p class="text-xs font-bold mb-2 text-[#8b7d6b]">しおり（クイックジャンプ）:</p>
-                    <a onclick="scrollToSection('intro')" class="jump-link">1.プログラミングって？</a>
-                    <a onclick="scrollToSection('basics')" class="jump-link">2.基本のルール</a>
-                    <a onclick="scrollToSection('operators')" class="jump-link">3.魔法の記号(演算子)</a>
-                    <a onclick="scrollToSection('commands')" class="jump-link">4.魔法の言葉(命令)</a>
-                    <a onclick="scrollToSection('tips')" class="jump-link">5.上達のコツ</a>
+                <!-- Preview Tab Content -->
+                <div id="content-preview" class="tab-content hidden plain-content flex items-center justify-center p-8">
+                    <div class="text-center">
+                        <p class="text-3xl mb-4">🖼️</p>
+                        <p class="text-slate-500">Preview機能は準備中だよ。</p>
+                    </div>
                 </div>
 
-                <div id="section-intro" class="help-section">
-                    <h4>🌱 1. プログラミングってなーに？</h4>
-                    <p class="text-sm mb-4">
-                        プログラミングは、コンピュータへの「おねがいごと」を紙に書くようなものよ。<br>
-                        この「Spell-Script」では、あなたが書いた1行1行が「魔法の呪文」になって、コンピュータがそれを順番に実行してくれるの。
-                    </p>
-                </div>
-
-                <div id="section-basics" class="help-section">
-                    <h4>✨ 2. これだけは知っておきたい基本</h4>
-                    <div class="space-y-4 text-sm">
-                        <div class="p-4 bg-white/50 rounded border border-[#d1c7b7]">
-                            <p class="font-bold text-[#8b7d6b] mb-1">💬 文字を表示する (log)</p>
-                            <p>コンピュータに何かしゃべらせたい時は <span class="code-snippet">log("こんにちは")</span> と書きましょう。</p>
-                        </div>
-                        <div class="p-4 bg-white/50 rounded border border-[#d1c7b7]">
-                            <p class="font-bold text-[#8b7d6b] mb-1">📦 データをしまう箱 (変数/setvar)</p>
-                            <p><span class="code-snippet">setvar("なまえ", "アリス")</span> と書くと、「なまえ」という箱にデータをしまっておけるわよ。</p>
+                <!-- Help Tab Content -->
+                <div id="content-help" class="tab-content hidden plain-content p-8 text-slate-700 leading-relaxed help-container">
+                    <h3 class="text-2xl font-bold border-b-2 border-[#d1c7b7] mb-6 pb-2 text-[#5d544b] text-center">📕 Spell-Script 魔法の入門書</h3>
+                    <div class="jump-nav">
+                        <p class="text-xs font-bold mb-2 text-[#8b7d6b]">しおり（クイックジャンプ）:</p>
+                        <a onclick="scrollToHelp('intro')" class="jump-link">1.プログラミングって？</a>
+                        <a onclick="scrollToHelp('basics')" class="jump-link">2.基本のルール</a>
+                        <a onclick="scrollToHelp('operators')" class="jump-link">3.魔法の記号(演算子)</a>
+                        <a onclick="scrollToHelp('commands')" class="jump-link">4.魔法の言葉(命令)</a>
+                        <a onclick="scrollToHelp('tips')" class="jump-link">5.上達のコツ</a>
+                    </div>
+                    <div id="section-intro" class="help-section">
+                        <h4>🌱 1. プログラミングってなーに？</h4>
+                        <p class="text-sm mb-4">プログラミングは、コンピュータへの「おねがいごと」を紙に書くようなものよ。この「Spell-Script」では、あなたが書いた1行1行が「魔法の呪文」になって、コンピュータがそれを順番に実行してくれるの。間違えても爆発したりしないから、安心して色々な呪文を試してみてね！</p>
+                    </div>
+                    <div id="section-basics" class="help-section">
+                        <h4>✨ 2. これだけは知っておきたい基本</h4>
+                        <div class="space-y-4 text-sm">
+                            <div class="p-4 bg-white/50 rounded border border-[#d1c7b7]">
+                                <p class="font-bold text-[#8b7d6b] mb-1">💬 文字を表示する (log)</p>
+                                <p>コンピュータに何かしゃべらせたい時は <span class="code-snippet">log("こんにちは")</span> と書きましょう。文字は必ず <span class="code-snippet">"</span> (ダブルクォーテーション)で囲むのがルールよ。</p>
+                            </div>
+                            <div class="p-4 bg-white/50 rounded border border-[#d1c7b7]">
+                                <p class="font-bold text-[#8b7d6b] mb-1">📦 データをしまう箱 (変数/setvar)</p>
+                                <p><span class="code-snippet">setvar("なまえ", "アリス")</span> と書くと、「なまえ」という名前の箱にデータをしまっておけるわ。後で <span class="code-snippet">log(なまえ)</span> と書けば、中身を取り出せるの。</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- 演算子の説明セクション -->
-                <div id="section-operators" class="help-section">
-                    <h4>⚡ 3. 魔法の記号（演算子）</h4>
-                    <p class="text-sm mb-4">数字を計算したり、大きさを比べたりするための記号よ。これらを組み合わせることで、複雑な魔法が作れるようになるわ！</p>
-                    
-                    <p class="text-xs font-bold text-[#8b7d6b] mb-2">算数の記号：</p>
-                    <div class="op-grid text-xs">
-                        <div class="op-card"><strong>+</strong> (たす)</div>
-                        <div class="op-card"><strong>-</strong> (ひく)</div>
-                        <div class="op-card"><strong>*</strong> (かける)</div>
-                        <div class="op-card"><strong>/</strong> (わる)</div>
-                        <div class="op-card"><strong>%</strong> (あまり)</div>
+                    <div id="section-operators" class="help-section">
+                        <h4>⚡ 3. 魔法の記号（演算子）</h4>
+                        <p class="text-sm mb-2">数字を計算したり、状態を比べたりするための大切な記号たちよ。</p>
+                        <ul class="list-disc ml-6 text-sm space-y-1 mb-4">
+                            <li><span class="code-snippet">+</span> <span class="code-snippet">-</span> <span class="code-snippet">*</span> <span class="code-snippet">/</span> ： 足し算、引き算、掛け算、割り算。</li>
+                            <li><span class="code-snippet">==</span>　<span class="code-snippet">!=</span> ： 左右が同じか/違うかどうか。</li>
+                            <li><span class="code-snippet">></span> <span class="code-snippet"><</span> <span class="code-snippet">>=</span> <span class="code-snippet"><=</span> ： どちらが大きいか比べる。</li>
+                        </ul>
+                        <div class="example-block">setvar("total", 10 + 20)
+log(total) // 30 と表示されるわ</div>
                     </div>
-
-                    <p class="text-xs font-bold text-[#8b7d6b] mb-2 mt-4">比べっこの記号（if文でよく使うわ！）：</p>
-                    <div class="op-grid text-xs">
-                        <div class="op-card"><strong>==</strong> (おなじ)</div>
-                        <div class="op-card"><strong>!=</strong> (ちがう)</div>
-                        <div class="op-card"><strong>&gt;</strong> (より大きい)</div>
-                        <div class="op-card"><strong>&lt;</strong> (より小さい)</div>
-                        <div class="op-card"><strong>&gt;=</strong> (以上)</div>
-                        <div class="op-card"><strong>&lt;=</strong> (以下)</div>
-                    </div>
-                    
-                    <div class="example-block">if(level >= 10)
-  log("上級魔法が使えるよ！")
+                    <div id="section-commands" class="help-section">
+                        <h4>🪄 4. 魔法の言葉（命令）の使いかた</h4>
+                        <div class="space-y-4 text-sm">
+                             <p>呪文の流れをコントロールするための特別な命令よ。必ず最後は「エンド」で閉じるのを忘れないでね。</p>
+                             <div class="p-4 bg-white/50 rounded border border-[#d1c7b7]">
+                                <p class="font-bold text-[#8b7d6b] mb-1">分岐の魔法 (if / ifend)</p>
+                                <p>条件が合っている時だけ中身を実行するわ。</p>
+                                <div class="example-block">if(hp < 20)
+  log("ピンチ！")
 ifend</div>
-                </div>
-
-                <div id="section-commands" class="help-section">
-                    <h4>🪄 4. 魔法の言葉（命令）の使いかた</h4>
-                    
-                    <div class="space-y-8">
-                        <!-- log -->
-                        <div>
-                            <p class="font-bold text-sm mb-1">💎 log(内容)</p>
-                            <p class="text-xs pl-4 mb-2">カッコの中に書いたものを「Log」タブに書き出します。文字をつなげる時は `+` を使ってね。</p>
-                            <div class="example-block">log("答えは" + (10 + 20) + "です")</div>
-                        </div>
-
-                        <!-- setvar -->
-                        <div>
-                            <p class="font-bold text-sm mb-1">💎 setvar("名前", 値)</p>
-                            <p class="text-xs pl-4 mb-2">「名前」という箱を作って、そこに「値」を保存します。</p>
-                            <div class="example-block">setvar("hp", 100)
-setvar("items", ["杖", "薬草"])</div>
-                        </div>
-
-                        <!-- if / elif / else -->
-                        <div>
-                            <p class="font-bold text-sm mb-1">💎 if(条件) ... elif ... else ... ifend</p>
-                            <p class="text-xs pl-4 mb-2">「もし〜なら」を判定します。`elif`（そうでなくて、もし）や `else`（どれでもなければ）で細かく分けられるわ。最後は必ず `ifend` で締めてね。</p>
-                            <div class="example-block">if(hp == 0)
-  log("たおれてしまった！")
-elif(hp < 20)
-  log("ピンチ！回復して！")
-else
-  log("まだまだ元気よ！")
-ifend</div>
-                        </div>
-
-                        <!-- while -->
-                        <div>
-                            <p class="font-bold text-sm mb-1">💎 while(条件) ... whileend</p>
-                            <p class="text-xs pl-4 mb-2">条件が正しい間、ずっと繰り返します。終わったら `whileend` と書きましょう。</p>
-                            <div class="example-block">setvar("n", 1)
+                             </div>
+                             <div class="p-4 bg-white/50 rounded border border-[#d1c7b7]">
+                                <p class="font-bold text-[#8b7d6b] mb-1">繰り返しの儀式 (while / whileend)</p>
+                                <p>条件が合っている間、ずっと中身を繰り返すわ。</p>
+                                <div class="example-block">setvar("n", 1)
 while(n <= 3)
-  log(n + "回目の魔法！")
+  log(n + "回目！")
   setvar("n", n + 1)
 whileend</div>
-                        </div>
-
-                        <!-- func -->
-                        <div>
-                            <p class="font-bold text-sm mb-1">💎 func 名前(引数) ... funcend</p>
-                            <p class="text-xs pl-4 mb-2">あなただけの新しい魔法（関数）を作ります。何度も使う処理をまとめておくと便利よ！</p>
-                            <div class="example-block">func attack(power)
-  log(power + "のダメージ！")
+                             </div>
+                             <div class="p-4 bg-white/50 rounded border border-[#d1c7b7]">
+                                <p class="font-bold text-[#8b7d6b] mb-1">オリジナルの魔法 (func / funcend)</p>
+                                <p>一連の動きを「新しい呪文」として登録できるわ。登録した後は、名前を呼ぶだけで実行できるの！</p>
+                                <div class="example-block">func fire()
+  log("メラメラ...")
 funcend
 
-attack(50)</div>
+fire() // ここで呪文を呼び出す</div>
+                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div id="section-tips" class="help-section">
-                    <div class="mt-10 p-6 bg-[#8b7d6b]/10 border border-[#d1c7b7] rounded-xl">
-                        <h4 class="text-center font-bold text-[#5d544b] !mt-0 mb-4 text-base border-none p-0">🚀 一流の魔法使いへの近道！</h4>
-                        <div class="space-y-4 text-xs leading-relaxed text-[#5d544b]">
-                            <div class="flex gap-2">
-                                <span class="text-lg">💡</span>
-                                <p><strong>エラーは「魔法の失敗」じゃない！</strong><br>コンピュータが「言葉がわからなかったよ」と教えてくれてるだけ。ヒントを見て、ゆっくり直してみてね。</p>
-                            </div>
-                            <div class="flex gap-2">
-                                <span class="text-lg">📐</span>
-                                <p><strong>見た目をきれいに！</strong><br>`if` や `while` の中身は、スペース2つ分くらい右にずらして書くと読みやすくなるわよ。</p>
-                            </div>
-                        </div>
+                    <div id="section-tips" class="help-section">
+                        <h4>💡 5. 上達のコツ</h4>
+                        <ul class="list-disc ml-6 text-sm space-y-2">
+                            <li><strong>// コメントを活用して：</strong> <span class="code-snippet">//</span> の後はメモ書きとして無視されるわ。自分用のメモを残しておくと読みやすいわよ。</li>
+                            <li><strong>1つずつ実行して：</strong> 一気にたくさん書かずに、少し書いたら「実行」して動きを確かめるのが一番の近道よ。</li>
+                            <li><strong>エラーを恐れないで：</strong> 赤い文字が出たら、それはコンピュータからの「ヒント」よ。カッコの閉じ忘れや、綴りの間違いがないか見てみてね。</li>
+                        </ul>
                     </div>
-                </div>
-                
-                <div class="text-center mt-10 pb-10">
-                    <button onclick="scrollToSection('intro')" class="text-xs text-[#8b7d6b] hover:underline">一番上に戻る ⬆️</button>
                 </div>
             </div>
 
@@ -444,257 +359,180 @@ attack(50)</div>
             </button>
         </div>
 
-        <div class="mt-4 text-center text-[10px] text-slate-400">
-            Spell-Script Interpreter - Adventure Edition
+        <div id="quest-success" class="hidden mt-4 p-4 bg-green-100 text-green-700 border border-green-200 rounded-lg text-center font-bold animate-bounce">
+            🎊 クエストクリア！素晴らしいわ！
         </div>
     </div>
 
     <script>
+        const quests = [
+            { id: 1, title: "1. 挨拶の魔法", desc: "ログに 「Hello」 と表示させてみて！", check: (logs) => logs.some(l => l.text === "Hello") },
+            { id: 2, title: "2. 箱の準備", desc: "変数 「power」 を 100 にして、その中身を表示してね。", check: (logs, vars) => vars["power"] == 100 && logs.some(l => l.text == "100") },
+            { id: 3, title: "3. 魔法の計算", desc: "15 かける 4 の結果を表示して。", check: (logs) => logs.some(l => l.text == "60") },
+            { id: 4, title: "4. 道の分岐", desc: "hpを30にし、もし50より小さければ 「Warning」 と表示してね。", check: (logs, vars) => vars["hp"] == 30 && logs.some(l => l.text === "Warning") },
+            { id: 5, title: "5. 繰り返しの儀式", desc: "whileで 1 から 5 までを表示して。", check: (logs) => ["1","2","3","4","5"].every(n => logs.map(l => l.text).includes(n)) },
+            { id: 6, title: "6. オリジナルの魔法", desc: "func 「fire」 を作り、呼ぶと 「Burn!」 と出るようにして。", check: (logs, vars, funcs) => funcs["fire"] && logs.some(l => l.text === "Burn!") }
+        ];
+
+        let currentQuestId = null;
+        let clearedQuests = new Set();
+
         class Interpreter {
-            constructor() {
-                this.variables = {};
-                this.functions = {};
-                this.logs = [];
-                this.maxIterations = 1000;
-                this.currentLine = 0;
+            constructor() { this.variables = {}; this.functions = {}; this.logs = []; this.currentLine = 0; }
+            log(msg, isError = false) { this.logs.push({ text: String(msg), isError }); }
+            evaluate(expr) {
+                const keys = [...Object.keys(this.variables), ...Object.keys(this.functions)];
+                const values = [...Object.values(this.variables), ...Object.keys(this.functions).map(k => (...args) => this.callFunc(k, args))];
+                return new Function(...keys, `return (${expr})`)(...values);
             }
-
-            log(msg, isError = false) { 
-                this.logs.push({ text: String(msg), isError: isError }); 
-            }
-            
-            validateVariableName(name) {
-                if (!name) throw new Error("変数名が空だよ");
-                if (/^[0-9]/.test(name)) {
-                    throw new Error(`名前 '${name}' は数字から始めてはいけないよ`);
-                }
-            }
-
-            evaluateExpression(expr) {
-                try {
-                    const keys = Object.keys(this.variables);
-                    const values = Object.values(this.variables);
-                    const funcKeys = Object.keys(this.functions);
-                    const funcValues = funcKeys.map(k => (...args) => this.callFunction(k, args));
-
-                    const fn = new Function(...keys, ...funcKeys, `return (${expr})`);
-                    return fn(...values, ...funcValues);
-                } catch (e) { 
-                    if (e instanceof ReferenceError) {
-                        throw new Error(`存在しない名前だよ: ${e.message.split(' ')[0]}`);
-                    }
-                    throw new Error(`計算エラー: ${e.message}`); 
-                }
-            }
-
-            callFunction(name, args) {
-                const funcDef = this.functions[name];
-                if (!funcDef) throw new Error(`関数 '${name}' は見つからないよ`);
+            callFunc(name, args) {
+                const f = this.functions[name];
                 const oldVars = { ...this.variables };
-                const oldLine = this.currentLine;
-                funcDef.params.forEach((p, idx) => {
-                    this.variables[p.trim()] = args[idx];
-                });
-                this.runBlock(funcDef.body, oldLine + 1);
+                f.params.forEach((p, i) => this.variables[p.trim()] = args[i]);
+                this.run(f.body, this.currentLine);
                 this.variables = oldVars;
-                this.currentLine = oldLine;
-                return null;
             }
-
             execute(code) {
-                this.variables = {};
-                this.functions = {};
-                this.logs = [];
+                this.variables = {}; this.functions = {}; this.logs = [];
                 const lines = code.split('\n').map(l => l.trim());
-                try {
-                    let i = 0;
-                    const mainLines = [];
-                    while (i < lines.length) {
-                        const line = lines[i];
-                        if (line.toLowerCase().startsWith("func ")) {
-                            const match = line.match(/func\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\((.*)\)/i);
-                            if (match) {
-                                const funcName = match[1];
-                                const params = match[2] ? match[2].split(',') : [];
-                                let body = [];
-                                let depth = 1;
-                                let j = i + 1;
-                                while (j < lines.length && depth > 0) {
-                                    if (lines[j].toLowerCase().startsWith("func ")) depth++;
-                                    if (lines[j].toLowerCase().startsWith("funcend")) depth--;
-                                    if (depth > 0) body.push(lines[j]);
-                                    j++;
-                                }
-                                this.functions[funcName] = { params, body };
-                                i = j;
-                                continue;
-                            }
+                let i = 0, main = [];
+                while(i < lines.length) {
+                    if(lines[i].toLowerCase().startsWith("func ")) {
+                        const m = lines[i].match(/func\s+(\w+)\s*\((.*)\)/i);
+                        let body = [], depth = 1, j = i + 1;
+                        while(j < lines.length && depth > 0) {
+                            if(lines[j].toLowerCase().startsWith("func ")) depth++;
+                            if(lines[j].toLowerCase() === "funcend") depth--;
+                            if(depth > 0) body.push(lines[j]);
+                            j++;
                         }
-                        mainLines.push(line);
-                        i++;
+                        if (m) this.functions[m[1]] = { params: m[2] ? m[2].split(',') : [], body };
+                        i = j; continue;
                     }
-                    this.runBlock(mainLines, 0);
-                } catch (e) {
-                    this.log(`❌ Line ${this.currentLine + 1}: ${e.message}`, true);
+                    main.push(lines[i++]);
                 }
-                return this.logs;
+                try { this.run(main, 0); } catch(e) { this.log("❌ " + e.message, true); }
+                return { logs: this.logs, vars: this.variables, funcs: this.functions };
             }
-
-            runBlock(lines, offset) {
+            run(lines, offset) {
                 let i = 0;
-                while (i < lines.length) {
+                while(i < lines.length) {
                     this.currentLine = offset + i;
-                    const line = lines[i];
-                    if (!line || line.startsWith("//")) { i++; continue; }
-                    const lowerLine = line.toLowerCase();
-                    try {
-                        if (lowerLine.startsWith("setvar(")) {
-                            const match = line.match(/setvar\s*\(\s*["']?([^"'\s,]+)["']?\s*,\s*(.+)\s*\)/i);
-                            if (match) {
-                                const varName = match[1];
-                                this.validateVariableName(varName);
-                                this.variables[varName] = this.evaluateExpression(match[2]);
-                            }
-                            i++;
-                        } else if (lowerLine.startsWith("log(")) {
-                            const match = line.match(/log\s*\((.+)\)/i);
-                            if (match) this.log(this.evaluateExpression(match[1]));
-                            i++;
-                        } else if (lowerLine.startsWith("if(")) {
-                            const { endIdx } = this.handleIfBlock(lines, i, offset);
-                            i = endIdx + 1;
-                        } else if (lowerLine.startsWith("while(")) {
-                            const { endIdx } = this.handleWhileBlock(lines, i, offset);
-                            i = endIdx + 1;
-                        } else if (line.match(/^[a-zA-Z_$][a-zA-Z0-9_$]*\s*\(.*\)$/)) {
-                            this.evaluateExpression(line);
-                            i++;
-                        } else if (lowerLine === "whileend" || lowerLine === "ifend" || lowerLine === "else" || lowerLine.startsWith("elif")) {
-                            i++;
-                        } else {
-                            throw new Error(`知らない魔法だよ: ${line.split('(')[0]}`);
+                    const l = lines[i], low = l.toLowerCase();
+                    if(!l || l.startsWith("//")) { i++; continue; }
+                    if(low.startsWith("log(")) { 
+                        const match = l.match(/\((.+)\)/);
+                        if(match) this.log(this.evaluate(match[1])); i++; 
+                    }
+                    else if(low.startsWith("setvar(")) { 
+                        const m = l.match(/setvar\s*\(\s*["']?(\w+)["']?\s*,\s*(.+)\s*\)/i);
+                        if(m) this.variables[m[1]] = this.evaluate(m[2]); i++;
+                    }
+                    else if(low.startsWith("if(")) {
+                        let depth = 1, j = i + 1;
+                        while(j < lines.length && depth > 0) {
+                            if(lines[j].toLowerCase().startsWith("if(")) depth++;
+                            if(lines[j].toLowerCase() === "ifend") depth--;
+                            j++;
                         }
-                    } catch (e) { throw e; }
-                }
-            }
-
-            handleIfBlock(lines, startIdx, offset) {
-                let depth = 0;
-                let lastKeywordIdx = startIdx;
-                let blocks = [];
-                for (let j = startIdx; j < lines.length; j++) {
-                    const l = lines[j].toLowerCase();
-                    if (l.startsWith("if(")) depth++;
-                    if (l === "ifend") depth--;
-                    if (depth === 1 && (l.startsWith("elif(") || l === "else")) {
-                        const prevLine = lines[lastKeywordIdx];
-                        let cond = prevLine.toLowerCase().startsWith("else") ? "true" : (prevLine.match(/\((.+)\)/) ? prevLine.match(/\((.+)\)/)[1] : "true");
-                        blocks.push({ cond, start: lastKeywordIdx + 1, end: j - 1 });
-                        lastKeywordIdx = j;
+                        const match = l.match(/\((.+)\)/);
+                        if(match && this.evaluate(match[1])) this.run(lines.slice(i+1, j-1), offset + i + 1);
+                        i = j;
                     }
-                    if (depth === 0 && l === "ifend") {
-                        const prevLine = lines[lastKeywordIdx];
-                        let cond = prevLine.toLowerCase().startsWith("else") ? "true" : (prevLine.match(/\((.+)\)/) ? prevLine.match(/\((.+)\)/)[1] : "true");
-                        blocks.push({ cond, start: lastKeywordIdx + 1, end: j - 1 });
-                        for (let block of blocks) {
-                            if (this.evaluateExpression(block.cond)) {
-                                if (block.start <= block.end) this.runBlock(lines.slice(block.start, block.end + 1), offset + block.start);
-                                break;
-                            }
+                    else if(low.startsWith("while(")) {
+                        let depth = 1, j = i + 1;
+                        while(j < lines.length && depth > 0) {
+                            if(lines[j].toLowerCase().startsWith("while(")) depth++;
+                            if(lines[j].toLowerCase() === "whileend") depth--;
+                            j++;
                         }
-                        return { endIdx: j };
+                        const match = l.match(/\((.+)\)/);
+                        const cond = match ? match[1] : "false";
+                        let s = 0;
+                        while(this.evaluate(cond) && s++ < 100) this.run(lines.slice(i+1, j-1), offset + i + 1);
+                        i = j;
                     }
+                    else if(l.includes("(")) { try { this.evaluate(l); } catch(e) {} i++; }
+                    else i++;
                 }
-                throw new Error("if文を ifend で閉じ忘れてない？");
-            }
-
-            handleWhileBlock(lines, startIdx, offset) {
-                const condMatch = lines[startIdx].match(/while\((.+)\)/i);
-                const condition = condMatch ? condMatch[1] : "false";
-                let depth = 0;
-                let endIdx = -1;
-                for (let j = startIdx; j < lines.length; j++) {
-                    if (lines[j].toLowerCase().startsWith("while(")) depth++;
-                    if (lines[j].toLowerCase() === "whileend") depth--;
-                    if (depth === 0) { endIdx = j; break; }
-                }
-                if (endIdx !== -1) {
-                    const blockContent = lines.slice(startIdx + 1, endIdx);
-                    let safety = 0;
-                    while (this.evaluateExpression(condition)) {
-                        if (safety >= this.maxIterations) throw new Error("無限ループ！安全のために停止したよ");
-                        this.runBlock(blockContent, offset + startIdx + 1);
-                        safety++;
-                    }
-                    return { endIdx };
-                }
-                throw new Error("while文を whileend で閉じ忘れてない？");
             }
         }
 
-        const interpreter = new Interpreter();
+        const interp = new Interpreter();
         const codeInput = document.getElementById('codeInput');
         const outputLog = document.getElementById('outputLog');
-        const logCountBadge = document.getElementById('log-count');
         const ruledBg = document.getElementById('ruled-bg');
-        const scrollViewport = document.getElementById('main-scroll-viewport');
-        const lineNumbers = document.getElementById('line-numbers');
 
-        function switchTab(tabId) {
-            const tabs = ['script', 'log', 'preview', 'help'];
-            tabs.forEach(t => {
+        function switchTab(id) {
+            ['quest', 'script', 'log', 'preview', 'help'].forEach(t => {
                 document.getElementById('content-' + t).classList.add('hidden');
                 document.getElementById('tab-' + t).classList.remove('active');
             });
-            document.getElementById('content-' + tabId).classList.remove('hidden');
-            document.getElementById('tab-' + tabId).classList.add('active');
+            document.getElementById('content-' + id).classList.remove('hidden');
+            document.getElementById('tab-' + id).classList.add('active');
             
-            if (tabId === 'script' || tabId === 'log') {
-                scrollViewport.classList.remove('hidden');
-                ruledBg.style.display = 'block';
-                updateEditorState();
-            } else {
-                scrollViewport.classList.add('hidden');
-                ruledBg.style.display = 'none';
-            }
-            document.getElementById('runBtn').style.display = (tabId === 'help' || tabId === 'preview') ? 'none' : 'block';
+            const isEditor = (id === 'script' || id === 'log');
+            ruledBg.style.display = isEditor ? 'block' : 'none';
+            document.getElementById('runBtn').style.display = isEditor ? 'block' : 'none';
+            updateUI();
         }
 
-        function scrollToSection(id) {
+        function scrollToHelp(id) {
             const element = document.getElementById('section-' + id);
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth' });
+            if (element) element.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function updateUI() {
+            const lines = codeInput.value.split('\n');
+            document.getElementById('line-numbers').innerHTML = Array.from({length: Math.max(lines.length, 16)}, (_, i) => i + 1).join('<br>');
+            const active = document.querySelector('.tab-content:not(.hidden)');
+            if (active) {
+                const h = Math.max(active.scrollHeight, 540);
+                ruledBg.style.height = h + 'px';
+                if(active.id === 'content-script') codeInput.style.height = h + 'px';
             }
         }
 
-        const updateEditorState = () => {
-            const lines = codeInput.value.split('\n');
-            lineNumbers.innerHTML = Array.from({length: Math.max(lines.length, 16)}, (_, i) => i + 1).join('<br>');
-            const activeContent = document.querySelector('.tab-content:not(.hidden)');
-            if (activeContent && activeContent.id !== 'content-help') {
-                const finalHeight = Math.max(activeContent.scrollHeight, scrollViewport.offsetHeight);
-                ruledBg.style.height = finalHeight + 'px';
-                if (activeContent.id === 'content-script') codeInput.style.height = finalHeight + 'px';
-            }
-        };
+        function renderQuests() {
+            document.getElementById('quest-list').innerHTML = quests.map(q => `
+                <div onclick="selectQuest(${q.id})" class="quest-card ${currentQuestId === q.id ? 'active' : ''} ${clearedQuests.has(q.id) ? 'cleared' : ''}">
+                    <div class="flex justify-between text-xs font-bold mb-1">
+                        <span class="${clearedQuests.has(q.id) ? 'text-green-600' : 'text-[#8b7d6b]'}">${clearedQuests.has(q.id) ? '✅ クリア' : '修行中'}</span>
+                        <span class="text-slate-400">#${q.id}</span>
+                    </div>
+                    <h4 class="font-bold text-slate-700">${q.title}</h4>
+                    <p class="text-xs text-slate-500 mt-1">${q.desc}</p>
+                </div>
+            `).join('');
+        }
 
-        codeInput.addEventListener('input', updateEditorState);
-        window.addEventListener('resize', updateEditorState);
-        window.addEventListener('load', () => switchTab('script'));
+        function selectQuest(id) {
+            currentQuestId = id;
+            document.getElementById('quest-success').classList.add('hidden');
+            renderQuests();
+            switchTab('script');
+        }
 
+        codeInput.addEventListener('input', updateUI);
         document.getElementById('runBtn').addEventListener('click', () => {
-            const results = interpreter.execute(codeInput.value);
-            outputLog.innerHTML = results.length ? "" : '<div class="log-entry text-slate-400 italic border-none">何も表示されなかったよ。</div>';
-            results.forEach(log => {
-                const div = document.createElement('div');
-                div.className = "log-entry" + (log.isError ? " log-error" : "");
-                div.textContent = (log.isError ? "" : "✍️ ") + log.text;
-                outputLog.appendChild(div);
-            });
+            // リセット
+            document.getElementById('quest-success').classList.add('hidden');
+            
+            const res = interp.execute(codeInput.value);
+            outputLog.innerHTML = res.logs.map(l => `<div class="log-entry ${l.isError ? 'log-error' : ''}">${l.isError ? '' : '✍️ '}${l.text}</div>`).join('') || '<div class="log-entry text-slate-400 italic">ログなし</div>';
             switchTab('log');
-            logCountBadge.textContent = results.length;
-            logCountBadge.classList.remove('hidden');
+            
+            if(currentQuestId) {
+                const q = quests.find(q => q.id === currentQuestId);
+                if (q && q.check(res.logs, res.vars, res.funcs)) {
+                    clearedQuests.add(currentQuestId);
+                    document.getElementById('quest-success').classList.remove('hidden');
+                    renderQuests();
+                }
+            }
         });
+
+        window.onload = () => { renderQuests(); switchTab('script'); };
     </script>
 </body>
 </html>
