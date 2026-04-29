@@ -28,7 +28,7 @@
             background-color: var(--notebook-bg);
             box-shadow: 0 10px 25px rgba(0,0,0,0.1), 0 0 5px rgba(0,0,0,0.05);
             border: 1px solid var(--notebook-border);
-            height: 512px;
+            height: 540px;
             position: relative;
             overflow: hidden;
             display: flex;
@@ -164,14 +164,18 @@
             z-index: 10;
         }
 
+        /* Help specific styles */
+        .help-container {
+            scroll-behavior: smooth;
+        }
         .help-section h4 {
             color: #8b7d6b;
             font-weight: bold;
-            margin-top: 2rem;
-            margin-bottom: 0.75rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
             border-left: 5px solid #8b7d6b;
             padding-left: 10px;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
         }
         .code-snippet {
             background: #fdfaf0;
@@ -183,6 +187,16 @@
             color: #c2410c;
             font-weight: bold;
         }
+        .example-block {
+            background: #f1f5f9;
+            border-left: 4px solid #94a3b8;
+            padding: 8px 12px;
+            margin: 8px 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            white-space: pre-wrap;
+            color: #475569;
+        }
         .help-table {
             width: 100%;
             border-collapse: collapse;
@@ -193,10 +207,42 @@
             border: 1px solid #d1c7b7;
             padding: 8px;
             text-align: left;
+            vertical-align: top;
         }
         .help-table th {
             background: #f4f1e6;
             color: #5d544b;
+        }
+        .jump-nav {
+            background: #f4f1e6;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border: 1px dashed #d1c7b7;
+        }
+        .jump-link {
+            color: #8b7d6b;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-right: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .jump-link:hover {
+            color: #5d544b;
+        }
+        .op-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        .op-card {
+            background: white;
+            border: 1px solid #d1c7b7;
+            padding: 8px;
+            border-radius: 6px;
         }
     </style>
 </head>
@@ -219,7 +265,22 @@
                 <div id="content-script" class="tab-content">
                     <div class="editor-container">
                         <div id="line-numbers" class="line-numbers"></div>
-                        <textarea id="codeInput" spellcheck="false" placeholder="ここにスクリプトを書いてね..."></textarea>
+                        <textarea id="codeInput" spellcheck="false" placeholder="ここにスクリプトを書いてね...">
+// 演算子を使って計算してみよう！
+setvar("a", 10)
+setvar("b", 5)
+
+log("たし算: " + (a + b))
+log("ひき算: " + (a - b))
+log("かけ算: " + (a * b))
+log("わり算: " + (a / b))
+
+if(a > b)
+  log("aのほうが大きいね！")
+else
+  log("bのほうが大きいか、同じくらいかな？")
+ifend
+                        </textarea>
                     </div>
                 </div>
 
@@ -237,74 +298,143 @@
                 </div>
             </div>
 
-            <div id="content-help" class="tab-content hidden h-full plain-content p-8 text-slate-700 leading-relaxed">
-                <h3 class="text-2xl font-bold border-b-2 border-[#d1c7b7] mb-6 pb-2 text-[#5d544b] text-center">📔 言語：Spell-Script 書き方事典</h3>
+            <div id="content-help" class="tab-content hidden h-full plain-content p-8 text-slate-700 leading-relaxed help-container">
+                <h3 class="text-2xl font-bold border-b-2 border-[#d1c7b7] mb-6 pb-2 text-[#5d544b] text-center">📕 Spell-Script 魔法の入門書</h3>
                 
-                <div class="help-section">
-                    <h4>💎 1. 書き方の基本ルール</h4>
-                    <ul class="space-y-3 text-sm list-disc pl-5">
-                        <li><strong>数字</strong>：そのまま書きます。 (例: <span class="code-snippet">100</span>)</li>
-                        <li><strong>文字列</strong>：ダブルクォーテーション <span class="code-snippet">"</span> で囲みます。 (例: <span class="code-snippet">"こんにちは"</span>)</li>
-                        <li><strong>変数</strong>：名前をそのまま書きます。 (例: <span class="code-snippet">体力</span>)
-                            <p class="mt-1 text-xs text-blue-600 font-bold">※変数の名前は、必ず「文字（または _ や $）」から始めてください。数字から始めることはできません。</p>
-                        </li>
-                        <li><strong>コメントアウト</strong>： <span class="code-snippet">//</span> の右側は無視されます。</li>
-                    </ul>
+                <div class="jump-nav">
+                    <p class="text-xs font-bold mb-2 text-[#8b7d6b]">しおり（クイックジャンプ）:</p>
+                    <a onclick="scrollToSection('intro')" class="jump-link">1.プログラミングって？</a>
+                    <a onclick="scrollToSection('basics')" class="jump-link">2.基本のルール</a>
+                    <a onclick="scrollToSection('operators')" class="jump-link">3.魔法の記号(演算子)</a>
+                    <a onclick="scrollToSection('commands')" class="jump-link">4.魔法の言葉(命令)</a>
+                    <a onclick="scrollToSection('tips')" class="jump-link">5.上達のコツ</a>
                 </div>
 
-                <div class="help-section">
-                    <h4>🧮 2. 演算子</h4>
-                    <table class="help-table">
-                        <thead>
-                            <tr><th>種類</th><th>記号</th><th>意味</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>計算</td><td>+ , - , * , / , %</td><td>足す、引く、掛ける、割る、余り</td></tr>
-                            <tr><td>比較</td><td>> , < , >= , <=</td><td>大きい、小さい、以上、以下</td></tr>
-                            <tr><td>一致</td><td>== , !=</td><td>等しい、等しくない</td></tr>
-                            <tr><td>論理</td><td>&& , ||</td><td>かつ、または</td></tr>
-                        </tbody>
-                    </table>
+                <div id="section-intro" class="help-section">
+                    <h4>🌱 1. プログラミングってなーに？</h4>
+                    <p class="text-sm mb-4">
+                        プログラミングは、コンピュータへの「おねがいごと」を紙に書くようなものよ。<br>
+                        この「Spell-Script」では、あなたが書いた1行1行が「魔法の呪文」になって、コンピュータがそれを順番に実行してくれるの。
+                    </p>
                 </div>
 
-                <div class="help-section">
-                    <h4>🪄 3. 魔法の言葉（関数・構文）</h4>
-                    <div class="space-y-6 text-sm">
-                        <div>
-                            <p class="font-bold mb-1">● SETVAR("変数名", 値)</p>
-                            <p class="pl-4">変数に値を入れます。名前はダブルクォーテーションで囲みます。<br>例: <span class="code-snippet">SETVAR("体力", 100)</span></p>
+                <div id="section-basics" class="help-section">
+                    <h4>✨ 2. これだけは知っておきたい基本</h4>
+                    <div class="space-y-4 text-sm">
+                        <div class="p-4 bg-white/50 rounded border border-[#d1c7b7]">
+                            <p class="font-bold text-[#8b7d6b] mb-1">💬 文字を表示する (log)</p>
+                            <p>コンピュータに何かしゃべらせたい時は <span class="code-snippet">log("こんにちは")</span> と書きましょう。</p>
                         </div>
-                        <div>
-                            <p class="font-bold mb-1">● LOG(内容)</p>
-                            <p class="pl-4">Logタブに表示します。変数名を書くと中身が表示されます。<br>例: <span class="code-snippet">LOG("残りの体力: " + 体力)</span></p>
-                        </div>
-                        <div>
-                            <p class="font-bold mb-1">● IF(条件) 〜 ELIF / ELSE 〜 IFEND</p>
-                            <p class="pl-4">条件分岐。<br>例: <span class="code-snippet">IF(体力 <= 0) LOG("ゲームオーバー") IFEND</span></p>
-                        </div>
-                        <div>
-                            <p class="font-bold mb-1">● WHILE(条件) 〜 WHILEEND</p>
-                            <p class="pl-4">ループ。<br>例: <span class="code-snippet">WHILE(i < 5) ... SETVAR("i", i + 1) WHILEEND</span></p>
+                        <div class="p-4 bg-white/50 rounded border border-[#d1c7b7]">
+                            <p class="font-bold text-[#8b7d6b] mb-1">📦 データをしまう箱 (変数/setvar)</p>
+                            <p><span class="code-snippet">setvar("なまえ", "アリス")</span> と書くと、「なまえ」という箱にデータをしまっておけるわよ。</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-10 p-6 bg-[#8b7d6b]/10 border border-[#d1c7b7] rounded-xl">
-                    <h4 class="text-center font-bold text-[#5d544b] mb-4 text-base">🚀 一流の魔法使いへの近道！</h4>
-                    <div class="space-y-4 text-xs leading-relaxed text-[#5d544b]">
-                        <div class="flex gap-2">
-                            <span class="text-lg">📐</span>
-                            <p><strong>インデントで見やすく！</strong><br>`IF` や `WHILE` の中身をスペースで少し右にずらす（インデント）と、魔法の構造が一目でわかるようになりますよ。</p>
+                <!-- 演算子の説明セクション -->
+                <div id="section-operators" class="help-section">
+                    <h4>⚡ 3. 魔法の記号（演算子）</h4>
+                    <p class="text-sm mb-4">数字を計算したり、大きさを比べたりするための記号よ。これらを組み合わせることで、複雑な魔法が作れるようになるわ！</p>
+                    
+                    <p class="text-xs font-bold text-[#8b7d6b] mb-2">算数の記号：</p>
+                    <div class="op-grid text-xs">
+                        <div class="op-card"><strong>+</strong> (たす)</div>
+                        <div class="op-card"><strong>-</strong> (ひく)</div>
+                        <div class="op-card"><strong>*</strong> (かける)</div>
+                        <div class="op-card"><strong>/</strong> (わる)</div>
+                        <div class="op-card"><strong>%</strong> (あまり)</div>
+                    </div>
+
+                    <p class="text-xs font-bold text-[#8b7d6b] mb-2 mt-4">比べっこの記号（if文でよく使うわ！）：</p>
+                    <div class="op-grid text-xs">
+                        <div class="op-card"><strong>==</strong> (おなじ)</div>
+                        <div class="op-card"><strong>!=</strong> (ちがう)</div>
+                        <div class="op-card"><strong>&gt;</strong> (より大きい)</div>
+                        <div class="op-card"><strong>&lt;</strong> (より小さい)</div>
+                        <div class="op-card"><strong>&gt;=</strong> (以上)</div>
+                        <div class="op-card"><strong>&lt;=</strong> (以下)</div>
+                    </div>
+                    
+                    <div class="example-block">if(level >= 10)
+  log("上級魔法が使えるよ！")
+ifend</div>
+                </div>
+
+                <div id="section-commands" class="help-section">
+                    <h4>🪄 4. 魔法の言葉（命令）の使いかた</h4>
+                    
+                    <div class="space-y-8">
+                        <!-- log -->
+                        <div>
+                            <p class="font-bold text-sm mb-1">💎 log(内容)</p>
+                            <p class="text-xs pl-4 mb-2">カッコの中に書いたものを「Log」タブに書き出します。文字をつなげる時は `+` を使ってね。</p>
+                            <div class="example-block">log("答えは" + (10 + 20) + "です")</div>
                         </div>
-                        <div class="flex gap-2">
-                            <span class="text-lg">🏷️</span>
-                            <p><strong>分かりやすい名前をつけよう！</strong><br>`a` や `b` よりも `攻撃力` や `残り回数` のように、役割がわかる名前にすると後で見返したときに混乱しません。</p>
+
+                        <!-- setvar -->
+                        <div>
+                            <p class="font-bold text-sm mb-1">💎 setvar("名前", 値)</p>
+                            <p class="text-xs pl-4 mb-2">「名前」という箱を作って、そこに「値」を保存します。</p>
+                            <div class="example-block">setvar("hp", 100)
+setvar("items", ["杖", "薬草"])</div>
                         </div>
-                        <div class="flex gap-2">
-                            <span class="text-lg">🔁</span>
-                            <p><strong>小さなステップで確認！</strong><br>大きな魔法を一度に書くのではなく、1行書くたびに `LOG` で中身を確認するのが、バグ（呪い）を避けるコツです。</p>
+
+                        <!-- if / elif / else -->
+                        <div>
+                            <p class="font-bold text-sm mb-1">💎 if(条件) ... elif ... else ... ifend</p>
+                            <p class="text-xs pl-4 mb-2">「もし〜なら」を判定します。`elif`（そうでなくて、もし）や `else`（どれでもなければ）で細かく分けられるわ。最後は必ず `ifend` で締めてね。</p>
+                            <div class="example-block">if(hp == 0)
+  log("たおれてしまった！")
+elif(hp < 20)
+  log("ピンチ！回復して！")
+else
+  log("まだまだ元気よ！")
+ifend</div>
+                        </div>
+
+                        <!-- while -->
+                        <div>
+                            <p class="font-bold text-sm mb-1">💎 while(条件) ... whileend</p>
+                            <p class="text-xs pl-4 mb-2">条件が正しい間、ずっと繰り返します。終わったら `whileend` と書きましょう。</p>
+                            <div class="example-block">setvar("n", 1)
+while(n <= 3)
+  log(n + "回目の魔法！")
+  setvar("n", n + 1)
+whileend</div>
+                        </div>
+
+                        <!-- func -->
+                        <div>
+                            <p class="font-bold text-sm mb-1">💎 func 名前(引数) ... funcend</p>
+                            <p class="text-xs pl-4 mb-2">あなただけの新しい魔法（関数）を作ります。何度も使う処理をまとめておくと便利よ！</p>
+                            <div class="example-block">func attack(power)
+  log(power + "のダメージ！")
+funcend
+
+attack(50)</div>
                         </div>
                     </div>
+                </div>
+
+                <div id="section-tips" class="help-section">
+                    <div class="mt-10 p-6 bg-[#8b7d6b]/10 border border-[#d1c7b7] rounded-xl">
+                        <h4 class="text-center font-bold text-[#5d544b] !mt-0 mb-4 text-base border-none p-0">🚀 一流の魔法使いへの近道！</h4>
+                        <div class="space-y-4 text-xs leading-relaxed text-[#5d544b]">
+                            <div class="flex gap-2">
+                                <span class="text-lg">💡</span>
+                                <p><strong>エラーは「魔法の失敗」じゃない！</strong><br>コンピュータが「言葉がわからなかったよ」と教えてくれてるだけ。ヒントを見て、ゆっくり直してみてね。</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <span class="text-lg">📐</span>
+                                <p><strong>見た目をきれいに！</strong><br>`if` や `while` の中身は、スペース2つ分くらい右にずらして書くと読みやすくなるわよ。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-10 pb-10">
+                    <button onclick="scrollToSection('intro')" class="text-xs text-[#8b7d6b] hover:underline">一番上に戻る ⬆️</button>
                 </div>
             </div>
 
@@ -315,7 +445,7 @@
         </div>
 
         <div class="mt-4 text-center text-[10px] text-slate-400">
-            Spell-Script Interpreter - Beginner Edition
+            Spell-Script Interpreter - Adventure Edition
         </div>
     </div>
 
@@ -323,6 +453,7 @@
         class Interpreter {
             constructor() {
                 this.variables = {};
+                this.functions = {};
                 this.logs = [];
                 this.maxIterations = 1000;
                 this.currentLine = 0;
@@ -335,10 +466,7 @@
             validateVariableName(name) {
                 if (!name) throw new Error("変数名が空だよ");
                 if (/^[0-9]/.test(name)) {
-                    throw new Error(`変数名 '${name}' は数字から始めてはいけないよ`);
-                }
-                if (!/^[a-zA-Z_$_\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf]/.test(name)) {
-                    throw new Error(`変数名 '${name}' に使えない文字が入っているよ`);
+                    throw new Error(`名前 '${name}' は数字から始めてはいけないよ`);
                 }
             }
 
@@ -346,8 +474,11 @@
                 try {
                     const keys = Object.keys(this.variables);
                     const values = Object.values(this.variables);
-                    const fn = new Function(...keys, `return (${expr})`);
-                    return fn(...values);
+                    const funcKeys = Object.keys(this.functions);
+                    const funcValues = funcKeys.map(k => (...args) => this.callFunction(k, args));
+
+                    const fn = new Function(...keys, ...funcKeys, `return (${expr})`);
+                    return fn(...values, ...funcValues);
                 } catch (e) { 
                     if (e instanceof ReferenceError) {
                         throw new Error(`存在しない名前だよ: ${e.message.split(' ')[0]}`);
@@ -356,12 +487,53 @@
                 }
             }
 
+            callFunction(name, args) {
+                const funcDef = this.functions[name];
+                if (!funcDef) throw new Error(`関数 '${name}' は見つからないよ`);
+                const oldVars = { ...this.variables };
+                const oldLine = this.currentLine;
+                funcDef.params.forEach((p, idx) => {
+                    this.variables[p.trim()] = args[idx];
+                });
+                this.runBlock(funcDef.body, oldLine + 1);
+                this.variables = oldVars;
+                this.currentLine = oldLine;
+                return null;
+            }
+
             execute(code) {
                 this.variables = {};
+                this.functions = {};
                 this.logs = [];
                 const lines = code.split('\n').map(l => l.trim());
                 try {
-                    this.runBlock(lines, 0);
+                    let i = 0;
+                    const mainLines = [];
+                    while (i < lines.length) {
+                        const line = lines[i];
+                        if (line.toLowerCase().startsWith("func ")) {
+                            const match = line.match(/func\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\((.*)\)/i);
+                            if (match) {
+                                const funcName = match[1];
+                                const params = match[2] ? match[2].split(',') : [];
+                                let body = [];
+                                let depth = 1;
+                                let j = i + 1;
+                                while (j < lines.length && depth > 0) {
+                                    if (lines[j].toLowerCase().startsWith("func ")) depth++;
+                                    if (lines[j].toLowerCase().startsWith("funcend")) depth--;
+                                    if (depth > 0) body.push(lines[j]);
+                                    j++;
+                                }
+                                this.functions[funcName] = { params, body };
+                                i = j;
+                                continue;
+                            }
+                        }
+                        mainLines.push(line);
+                        i++;
+                    }
+                    this.runBlock(mainLines, 0);
                 } catch (e) {
                     this.log(`❌ Line ${this.currentLine + 1}: ${e.message}`, true);
                 }
@@ -373,35 +545,31 @@
                 while (i < lines.length) {
                     this.currentLine = offset + i;
                     const line = lines[i];
-                    
                     if (!line || line.startsWith("//")) { i++; continue; }
-                    
+                    const lowerLine = line.toLowerCase();
                     try {
-                        if (line.startsWith("SETVAR(")) {
-                            const match = line.match(/^SETVAR\s*\(\s*["']?([^"'\s,]+)["']?\s*,\s*(.+)\s*\)$/);
+                        if (lowerLine.startsWith("setvar(")) {
+                            const match = line.match(/setvar\s*\(\s*["']?([^"'\s,]+)["']?\s*,\s*(.+)\s*\)/i);
                             if (match) {
                                 const varName = match[1];
                                 this.validateVariableName(varName);
                                 this.variables[varName] = this.evaluateExpression(match[2]);
-                            } else {
-                                throw new Error("SETVARの書き方がおかしいみたい");
                             }
                             i++;
-                        } else if (line.startsWith("LOG(")) {
-                            const match = line.match(/^LOG\s*\((.+)\)$/);
-                            if (match) {
-                                this.log(this.evaluateExpression(match[1]));
-                            } else {
-                                throw new Error("LOGの書き方がおかしいみたい");
-                            }
+                        } else if (lowerLine.startsWith("log(")) {
+                            const match = line.match(/log\s*\((.+)\)/i);
+                            if (match) this.log(this.evaluateExpression(match[1]));
                             i++;
-                        } else if (line.startsWith("IF(")) {
+                        } else if (lowerLine.startsWith("if(")) {
                             const { endIdx } = this.handleIfBlock(lines, i, offset);
                             i = endIdx + 1;
-                        } else if (line.startsWith("WHILE(")) {
+                        } else if (lowerLine.startsWith("while(")) {
                             const { endIdx } = this.handleWhileBlock(lines, i, offset);
                             i = endIdx + 1;
-                        } else if (line.startsWith("WHILEEND") || line.startsWith("IFEND") || line.startsWith("ELSE") || line.startsWith("ELIF")) {
+                        } else if (line.match(/^[a-zA-Z_$][a-zA-Z0-9_$]*\s*\(.*\)$/)) {
+                            this.evaluateExpression(line);
+                            i++;
+                        } else if (lowerLine === "whileend" || lowerLine === "ifend" || lowerLine === "else" || lowerLine.startsWith("elif")) {
                             i++;
                         } else {
                             throw new Error(`知らない魔法だよ: ${line.split('(')[0]}`);
@@ -414,64 +582,42 @@
                 let depth = 0;
                 let lastKeywordIdx = startIdx;
                 let blocks = [];
-                
                 for (let j = startIdx; j < lines.length; j++) {
-                    const line = lines[j];
-                    if (line.startsWith("IF(")) depth++;
-                    if (line.startsWith("IFEND")) depth--;
-                    
-                    if (depth === 1) {
-                        if (line.startsWith("ELIF(") || line.startsWith("ELSE")) {
-                            const prevLine = lines[lastKeywordIdx];
-                            let cond = "false";
-                            if (prevLine.startsWith("IF(") || prevLine.startsWith("ELIF(")) {
-                                const m = prevLine.match(/\((.+)\)/);
-                                cond = m ? m[1] : "false";
-                            } else if (prevLine.startsWith("ELSE")) {
-                                cond = "true";
-                            }
-                            blocks.push({ cond, start: lastKeywordIdx + 1, end: j - 1 });
-                            lastKeywordIdx = j;
-                        }
-                    }
-                    
-                    if (depth === 0 && line.startsWith("IFEND")) {
+                    const l = lines[j].toLowerCase();
+                    if (l.startsWith("if(")) depth++;
+                    if (l === "ifend") depth--;
+                    if (depth === 1 && (l.startsWith("elif(") || l === "else")) {
                         const prevLine = lines[lastKeywordIdx];
-                        let cond = "false";
-                        if (prevLine.startsWith("IF(") || prevLine.startsWith("ELIF(")) {
-                            const m = prevLine.match(/\((.+)\)/);
-                            cond = m ? m[1] : "false";
-                        } else if (prevLine.startsWith("ELSE")) {
-                            cond = "true";
-                        }
+                        let cond = prevLine.toLowerCase().startsWith("else") ? "true" : (prevLine.match(/\((.+)\)/) ? prevLine.match(/\((.+)\)/)[1] : "true");
                         blocks.push({ cond, start: lastKeywordIdx + 1, end: j - 1 });
-                        
+                        lastKeywordIdx = j;
+                    }
+                    if (depth === 0 && l === "ifend") {
+                        const prevLine = lines[lastKeywordIdx];
+                        let cond = prevLine.toLowerCase().startsWith("else") ? "true" : (prevLine.match(/\((.+)\)/) ? prevLine.match(/\((.+)\)/)[1] : "true");
+                        blocks.push({ cond, start: lastKeywordIdx + 1, end: j - 1 });
                         for (let block of blocks) {
                             if (this.evaluateExpression(block.cond)) {
-                                if (block.start <= block.end) {
-                                    this.runBlock(lines.slice(block.start, block.end + 1), offset + block.start);
-                                }
+                                if (block.start <= block.end) this.runBlock(lines.slice(block.start, block.end + 1), offset + block.start);
                                 break;
                             }
                         }
                         return { endIdx: j };
                     }
                 }
-                throw new Error("IF文を IFEND で閉じ忘れてない？");
+                throw new Error("if文を ifend で閉じ忘れてない？");
             }
 
             handleWhileBlock(lines, startIdx, offset) {
-                const condMatch = lines[startIdx].match(/WHILE\((.+)\)/);
+                const condMatch = lines[startIdx].match(/while\((.+)\)/i);
                 const condition = condMatch ? condMatch[1] : "false";
                 let depth = 0;
                 let endIdx = -1;
-                
                 for (let j = startIdx; j < lines.length; j++) {
-                    if (lines[j].startsWith("WHILE(")) depth++;
-                    if (lines[j].startsWith("WHILEEND")) depth--;
+                    if (lines[j].toLowerCase().startsWith("while(")) depth++;
+                    if (lines[j].toLowerCase() === "whileend") depth--;
                     if (depth === 0) { endIdx = j; break; }
                 }
-                
                 if (endIdx !== -1) {
                     const blockContent = lines.slice(startIdx + 1, endIdx);
                     let safety = 0;
@@ -482,7 +628,7 @@
                     }
                     return { endIdx };
                 }
-                throw new Error("WHILE文を WHILEEND で閉じ忘れてない？");
+                throw new Error("while文を whileend で閉じ忘れてない？");
             }
         }
 
@@ -497,15 +643,11 @@
         function switchTab(tabId) {
             const tabs = ['script', 'log', 'preview', 'help'];
             tabs.forEach(t => {
-                const content = document.getElementById('content-' + t);
-                const btn = document.getElementById('tab-' + t);
-                if (content) content.classList.add('hidden');
-                if (btn) btn.classList.remove('active');
+                document.getElementById('content-' + t).classList.add('hidden');
+                document.getElementById('tab-' + t).classList.remove('active');
             });
-            const targetContent = document.getElementById('content-' + tabId);
-            const targetBtn = document.getElementById('tab-' + tabId);
-            if (targetContent) targetContent.classList.remove('hidden');
-            if (targetBtn) targetBtn.classList.add('active');
+            document.getElementById('content-' + tabId).classList.remove('hidden');
+            document.getElementById('tab-' + tabId).classList.add('active');
             
             if (tabId === 'script' || tabId === 'log') {
                 scrollViewport.classList.remove('hidden');
@@ -518,48 +660,37 @@
             document.getElementById('runBtn').style.display = (tabId === 'help' || tabId === 'preview') ? 'none' : 'block';
         }
 
+        function scrollToSection(id) {
+            const element = document.getElementById('section-' + id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
         const updateEditorState = () => {
             const lines = codeInput.value.split('\n');
-            const lineCount = lines.length;
-            let nums = "";
-            for (let i = 1; i <= Math.max(lineCount, 16); i++) {
-                nums += i + "<br>";
-            }
-            lineNumbers.innerHTML = nums;
-            
+            lineNumbers.innerHTML = Array.from({length: Math.max(lines.length, 16)}, (_, i) => i + 1).join('<br>');
             const activeContent = document.querySelector('.tab-content:not(.hidden)');
-            if (activeContent) {
-                const scrollHeight = activeContent.scrollHeight;
-                const viewHeight = scrollViewport.offsetHeight;
-                const finalHeight = Math.max(scrollHeight, viewHeight);
+            if (activeContent && activeContent.id !== 'content-help') {
+                const finalHeight = Math.max(activeContent.scrollHeight, scrollViewport.offsetHeight);
                 ruledBg.style.height = finalHeight + 'px';
-                if (activeContent.id === 'content-script') {
-                    codeInput.style.height = 'auto';
-                    codeInput.style.height = finalHeight + 'px';
-                }
+                if (activeContent.id === 'content-script') codeInput.style.height = finalHeight + 'px';
             }
         };
 
         codeInput.addEventListener('input', updateEditorState);
         window.addEventListener('resize', updateEditorState);
-        window.addEventListener('load', () => {
-            updateEditorState();
-            switchTab('script');
-        });
+        window.addEventListener('load', () => switchTab('script'));
 
         document.getElementById('runBtn').addEventListener('click', () => {
             const results = interpreter.execute(codeInput.value);
-            outputLog.innerHTML = "";
-            if (results.length === 0) {
-                outputLog.innerHTML = '<div class="log-entry text-slate-400 italic border-none">何も表示されなかったよ。</div>';
-            } else {
-                results.forEach(log => {
-                    const div = document.createElement('div');
-                    div.className = "log-entry" + (log.isError ? " log-error" : "");
-                    div.textContent = (log.isError ? "" : "✍️ ") + log.text;
-                    outputLog.appendChild(div);
-                });
-            }
+            outputLog.innerHTML = results.length ? "" : '<div class="log-entry text-slate-400 italic border-none">何も表示されなかったよ。</div>';
+            results.forEach(log => {
+                const div = document.createElement('div');
+                div.className = "log-entry" + (log.isError ? " log-error" : "");
+                div.textContent = (log.isError ? "" : "✍️ ") + log.text;
+                outputLog.appendChild(div);
+            });
             switchTab('log');
             logCountBadge.textContent = results.length;
             logCountBadge.classList.remove('hidden');
