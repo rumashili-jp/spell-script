@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Note-Spell Interpreter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@400;500&family=Yusei+Magic&family=Fira+Code&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --notebook-bg: #fffdf5;
+            --notebook-line: #d1c7b7;
+            --notebook-border: #d1c7b7;
+            --accent-color: #7d6e5d;
+            --line-height: 32px; 
+            --font-size: 16px;
+            --gutter-width: 40px;
+        }
+
+        body {
+            font-family: 'Kiwi Maru', serif;
+            background-color: #f0ede5;
+            background-image: radial-gradient(#d1cdc0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .notebook-page {
+            background-color: var(--notebook-bg);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1), 0 0 5px rgba(0,0,0,0.05);
+            border: 1px solid var(--notebook-border);
+            height: 512px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .scroll-viewport {
+            position: relative;
+            flex: 1;
+            overflow-y: scroll;
+            overflow-x: hidden;
+        }
+
+        .ruled-bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            pointer-events: none;
+            background-image: linear-gradient(transparent calc(var(--line-height) - 1px), var(--notebook-line) 1px);
+            background-size: 100% var(--line-height);
+            z-index: 1;
+        }
+
+        .ruled-bg-layer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: var(--gutter-width);
+            width: 1px;
+            height: 100%;
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .tab-btn {
+            font-family: 'Yusei Magic', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background-color: var(--notebook-bg);
+            border-bottom: 2px solid transparent;
+            color: #5d544b;
+            transform: translateY(2px);
+        }
+
+        .tab-btn:not(.active) {
+            background-color: #e6e2d3;
+            color: #a39b8f;
+        }
+
+        .editor-container {
+            display: flex;
+            position: relative;
+            z-index: 2;
+            width: 100%;
+        }
+
+        .line-numbers {
+            width: var(--gutter-width);
+            text-align: center;
+            font-family: 'Fira Code', monospace;
+            font-size: 10px;
+            color: #b0a89a;
+            line-height: var(--line-height);
+            padding-top: 0;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-family: 'Fira Code', 'Kiwi Maru', monospace;
+            padding: 0 10px;
+            line-height: var(--line-height) !important;
+            font-size: var(--font-size);
+            box-sizing: border-box;
+            display: block;
+            margin: 0;
+            resize: none;
+            overflow: hidden;
+            min-height: 100%;
+        }
+
+        .log-container {
+            position: relative;
+            z-index: 2;
+            padding-left: var(--gutter-width);
+        }
+
+        .log-entry {
+            height: var(--line-height);
+            line-height: var(--line-height);
+            font-size: var(--font-size);
+            padding: 0 10px;
+            color: #5d544b;
+            border-bottom: 1px solid var(--notebook-line);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+        }
+
+        .log-error {
+            color: #b91c1c;
+            background-color: rgba(248, 113, 113, 0.1);
+        }
+
+        .run-btn {
+            font-family: 'Yusei Magic', sans-serif;
+            background: #8b7d6b;
+            box-shadow: 2px 2px 0px #5d544b;
+            z-index: 50;
+        }
+
+        .run-btn:active {
+            box-shadow: 0px 0px 0px #5d544b;
+            transform: translate(2px, 2px);
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1c7b7; border-radius: 4px; }
+
+        .plain-content {
+            background-color: rgba(255, 255, 255, 0.85);
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .help-section h4 {
+            color: #8b7d6b;
+            font-weight: bold;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            border-left: 5px solid #8b7d6b;
+            padding-left: 10px;
+            font-size: 1.1rem;
+        }
+        .code-snippet {
+            background: #fdfaf0;
+            border: 1px solid #e2ded0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: #c2410c;
+            font-weight: bold;
+        }
+        .help-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.85rem;
+        }
+        .help-table th, .help-table td {
+            border: 1px solid #d1c7b7;
+            padding: 8px;
+            text-align: left;
+        }
+        .help-table th {
+            background: #f4f1e6;
+            color: #5d544b;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-10">
+
+    <div class="max-w-3xl mx-auto">
+        <div class="flex gap-1 ml-4">
+            <button onclick="switchTab('script')" id="tab-script" class="tab-btn active px-6 py-2 rounded-t-lg border border-b-0 border-[#d1c7b7] text-sm">Script</button>
+            <button onclick="switchTab('log')" id="tab-log" class="tab-btn px-6 py-2 rounded-t-lg border border-b-0 border-[#d1c7b7] text-sm flex items-center gap-2">
+                Log <span id="log-count" class="bg-[#d1c7b7] text-[10px] px-1.5 py-0.5 rounded-full text-white hidden">0</span>
+            </button>
+            <button onclick="switchTab('preview')" id="tab-preview" class="tab-btn px-6 py-2 rounded-t-lg border border-b-0 border-[#d1c7b7] text-sm">Preview</button>
+            <button onclick="switchTab('help')" id="tab-help" class="tab-btn px-6 py-2 rounded-t-lg border border-b-0 border-[#d1c7b7] text-sm">Help</button>
+        </div>
+
+        <div class="notebook-page rounded-lg">
+            <div id="main-scroll-viewport" class="scroll-viewport">
+                <div id="ruled-bg" class="ruled-bg-layer"></div>
+
+                <div id="content-script" class="tab-content">
+                    <div class="editor-container">
+                        <div id="line-numbers" class="line-numbers"></div>
+                        <textarea id="codeInput" spellcheck="false" placeholder="ここにスクリプトを書いてね...">
+// 言語名：Note-Spell (ノート・スペル)
+LOG("✨ Note-Spellの世界へようこそ")
+
+// 変数に名前を保存するよ
+SETVAR("name", "見習い魔法使い")
+
+LOG({name} + "の修行がはじまった！")
+                        </textarea>
+                    </div>
+                </div>
+
+                <div id="content-log" class="tab-content hidden">
+                    <div id="outputLog" class="log-container">
+                         <div class="log-entry text-slate-400 italic border-none">まだログはないよ。Scriptタブで「実行」してみてね。</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-preview" class="tab-content hidden h-full plain-content flex items-center justify-center">
+                <div class="text-center">
+                    <p class="text-3xl mb-4">🖼️</p>
+                    <p class="text-slate-500">Preview機能は準備中だよ。</p>
+                </div>
+            </div>
+
+            <div id="content-help" class="tab-content hidden h-full plain-content p-8 text-slate-700 leading-relaxed">
+                <h3 class="text-2xl font-bold border-b-2 border-[#d1c7b7] mb-6 pb-2 text-[#5d544b] text-center">📔 言語：Note-Spell 書き方事典</h3>
+                
+                <div class="help-section">
+                    <h4>💎 1. 書き方の基本ルール</h4>
+                    <ul class="space-y-3 text-sm list-disc pl-5">
+                        <li><strong>数字</strong>：そのまま書きます。 (例: <span class="code-snippet">100</span>)</li>
+                        <li><strong>文字列（言葉）</strong>：ダブルクォーテーション <span class="code-snippet">"</span> で囲みます。 (例: <span class="code-snippet">"こんにちは"</span>)</li>
+                        <li><strong>変数（箱）</strong>：中身を使いたいときは中カッコ <span class="code-snippet">{ }</span> で囲みます。 (例: <span class="code-snippet">{体力}</span>)</li>
+                        <li><strong>コメントアウト（自分用のメモ）</strong>： <span class="code-snippet">//</span> を書くと、その行の右側はプログラムとして無視されます。
+                            <p class="mt-1 text-xs text-slate-500">例: <span class="code-snippet">// ここはメモです</span></p>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h4>🧮 2. 演算子（計算とくらべる記号）</h4>
+                    <table class="help-table">
+                        <thead>
+                            <tr><th>種類</th><th>記号</th><th>意味</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>計算</td><td>+ , - , * , /</td><td>足す、引く、掛ける、割る</td></tr>
+                            <tr><td>比較</td><td>> , < , >= , <=</td><td>大きい、小さい、以上、以下</td></tr>
+                            <tr><td>一致</td><td>== , !=</td><td>等しい、等しくない</td></tr>
+                            <tr><td>論理</td><td>&& , ||</td><td>かつ、または</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="help-section">
+                    <h4>🪄 3. 魔法の言葉（関数・構文）</h4>
+                    <div class="space-y-6 text-sm">
+                        <div>
+                            <p class="font-bold mb-1">● SETVAR("変数名", 値)</p>
+                            <p class="pl-4">変数という箱に値を入れます。箱の名前も <span class="code-snippet">""</span> で囲んでね。<br>例: <span class="code-snippet">SETVAR("名前", "ポチ")</span></p>
+                        </div>
+                        <div>
+                            <p class="font-bold mb-1">● LOG(内容)</p>
+                            <p class="pl-4">Logタブに結果を書き出します。計算結果も出せるよ！<br>例: <span class="code-snippet">LOG("合計は " + {合計})</span></p>
+                        </div>
+                        <div>
+                            <p class="font-bold mb-1">● IF(条件) 〜 IFEND</p>
+                            <p class="pl-4">もし条件が合っていたら、中身を1回だけ実行します。<br>
+                            例: <span class="code-snippet">IF({体力} == 0) LOG("ゲームオーバー") IFEND</span></p>
+                        </div>
+                        <div>
+                            <p class="font-bold mb-1">● WHILE(条件) 〜 WHILEEND</p>
+                            <p class="pl-4">条件が合っている間、中身をずっと繰り返します。<br>
+                            例: <span class="code-snippet">WHILE({回数} < 3) ... WHILEEND</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-10 p-6 bg-[#8b7d6b]/5 border border-[#d1c7b7] rounded-xl text-xs text-slate-500 italic">
+                    <p>💡 プログラムを書くコツ：</p>
+                    <p>一気にたくさん書かずに、少し書いては「実行する」ボタンを押して、思った通りに動くか確認するのが上達の近道だよ！</p>
+                </div>
+            </div>
+
+            <button id="runBtn" class="run-btn absolute bottom-6 right-6 text-white px-8 py-3 rounded-full flex items-center gap-2 hover:opacity-90 transition-all">
+                <span>実行する</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            </button>
+        </div>
+
+        <div class="mt-4 text-center text-[10px] text-slate-400">
+            Note-Spell Interpreter - Beginner Edition
+        </div>
+    </div>
+
+    <script>
+        class Interpreter {
+            constructor() {
+                this.variables = {};
+                this.logs = [];
+                this.maxIterations = 1000;
+                this.currentLine = 0;
+            }
+            log(msg, isError = false) { this.logs.push({ text: msg, isError: isError }); }
+            replaceVariables(expression) {
+                if (typeof expression !== 'string') return expression;
+                return expression.replace(/\{(\w+)\}/g, (_, name) => {
+                    if (this.variables.hasOwnProperty(name)) {
+                        const val = this.variables[name];
+                        return typeof val === 'string' ? `"${val}"` : val;
+                    }
+                    throw new Error(`変数 '${name}' が見つからないよ`);
+                });
+            }
+            evaluateExpression(expr) {
+                try {
+                    const processed = this.replaceVariables(expr);
+                    return new Function(`return (${processed})`)();
+                } catch (e) { throw new Error(e.message); }
+            }
+            execute(code) {
+                this.variables = {};
+                this.logs = [];
+                const lines = code.split('\n').map(l => l.trim());
+                try {
+                    this.runBlock(lines, 0);
+                } catch (e) {
+                    this.log(`❌ Line ${this.currentLine + 1}: ${e.message}`, true);
+                }
+                return this.logs;
+            }
+            runBlock(lines, offset) {
+                let i = 0;
+                while (i < lines.length) {
+                    this.currentLine = offset + i;
+                    const line = lines[i];
+                    if (!line || line.startsWith("//")) { i++; continue; }
+                    try {
+                        if (line.startsWith("SETVAR(")) {
+                            const match = line.match(/SETVAR\("?(\w+)"?,\s*(.+)\)/);
+                            if (match) this.variables[match[1]] = this.evaluateExpression(match[2]);
+                            else throw new Error("SETVARの書き方がおかしいみたい");
+                            i++;
+                        } else if (line.startsWith("LOG(")) {
+                            const match = line.match(/LOG\((.+)\)/);
+                            if (match) this.log(this.evaluateExpression(match[1]));
+                            else throw new Error("LOGの書き方がおかしいみたい");
+                            i++;
+                        } else if (line.startsWith("IF(")) {
+                            const { endIdx } = this.handleIfBlock(lines, i, offset);
+                            i = endIdx + 1;
+                        } else if (line.startsWith("WHILE(")) {
+                            const { endIdx } = this.handleWhileBlock(lines, i, offset);
+                            i = endIdx + 1;
+                        } else if (line.startsWith("WHILEEND") || line.startsWith("IFEND") || line.startsWith("ELSE") || line.startsWith("ELIF")) {
+                            i++;
+                        } else {
+                            throw new Error("このコマンドは知らないなぁ: " + line.split('(')[0]);
+                        }
+                    } catch (e) { throw e; }
+                }
+            }
+            handleIfBlock(lines, startIdx, offset) {
+                let depth = 0, lastKeywordIdx = startIdx, blocks = [];
+                for (let j = startIdx; j < lines.length; j++) {
+                    const line = lines[j];
+                    if (line.startsWith("IF(")) depth++;
+                    if (line.startsWith("IFEND")) depth--;
+                    if (depth === 1 && (line.startsWith("ELIF(") || line.startsWith("ELSE"))) {
+                        const condMatch = lines[lastKeywordIdx].match(/\((.+)\)/);
+                        blocks.push({ cond: condMatch ? condMatch[1] : "true", start: lastKeywordIdx + 1, end: j - 1 });
+                        lastKeywordIdx = j;
+                    }
+                    if (depth === 0 && line.startsWith("IFEND")) {
+                        const condMatch = lines[lastKeywordIdx].match(/\((.+)\)/);
+                        blocks.push({ cond: condMatch ? condMatch[1] : "true", start: lastKeywordIdx + 1, end: j - 1 });
+                        for (let block of blocks) {
+                            if (this.evaluateExpression(block.cond)) {
+                                this.runBlock(lines.slice(block.start, block.end + 1), offset + block.start);
+                                break;
+                            }
+                        }
+                        return { endIdx: j };
+                    }
+                }
+                throw new Error("IF文を閉じ忘れてない？");
+            }
+            handleWhileBlock(lines, startIdx, offset) {
+                const condMatch = lines[startIdx].match(/WHILE\((.+)\)/);
+                const condition = condMatch ? condMatch[1] : "false";
+                let depth = 0, endIdx = -1;
+                for (let j = startIdx; j < lines.length; j++) {
+                    if (lines[j].startsWith("WHILE(")) depth++;
+                    if (lines[j].startsWith("WHILEEND")) depth--;
+                    if (depth === 0) { endIdx = j; break; }
+                }
+                if (endIdx !== -1) {
+                    const blockContent = lines.slice(startIdx + 1, endIdx);
+                    let safety = 0;
+                    while (this.evaluateExpression(condition)) {
+                        if (safety >= this.maxIterations) throw new Error("無限ループ！");
+                        this.runBlock(blockContent, offset + startIdx + 1);
+                        safety++;
+                    }
+                    return { endIdx };
+                }
+                throw new Error("WHILE文を閉じ忘れてない？");
+            }
+        }
+
+        const interpreter = new Interpreter();
+        const codeInput = document.getElementById('codeInput');
+        const outputLog = document.getElementById('outputLog');
+        const logCountBadge = document.getElementById('log-count');
+        const ruledBg = document.getElementById('ruled-bg');
+        const scrollViewport = document.getElementById('main-scroll-viewport');
+        const lineNumbers = document.getElementById('line-numbers');
+
+        function switchTab(tabId) {
+            const tabs = ['script', 'log', 'preview', 'help'];
+            tabs.forEach(t => {
+                const content = document.getElementById('content-' + t);
+                const btn = document.getElementById('tab-' + t);
+                if (content) content.classList.add('hidden');
+                if (btn) btn.classList.remove('active');
+            });
+            const targetContent = document.getElementById('content-' + tabId);
+            const targetBtn = document.getElementById('tab-' + tabId);
+            if (targetContent) targetContent.classList.remove('hidden');
+            if (targetBtn) targetBtn.classList.add('active');
+            
+            if (tabId === 'script' || tabId === 'log') {
+                scrollViewport.classList.remove('hidden');
+                ruledBg.style.display = 'block';
+                updateEditorState();
+            } else {
+                scrollViewport.classList.add('hidden');
+                ruledBg.style.display = 'none';
+            }
+            document.getElementById('runBtn').style.display = (tabId === 'help' || tabId === 'preview') ? 'none' : 'block';
+        }
+
+        const updateEditorState = () => {
+            const lines = codeInput.value.split('\n');
+            const lineCount = lines.length;
+            let nums = "";
+            for (let i = 1; i <= Math.max(lineCount, 16); i++) {
+                nums += i + "<br>";
+            }
+            lineNumbers.innerHTML = nums;
+            const activeContent = document.querySelector('.tab-content:not(.hidden)');
+            if (activeContent) {
+                const scrollHeight = activeContent.scrollHeight;
+                const viewHeight = scrollViewport.offsetHeight;
+                const finalHeight = Math.max(scrollHeight, viewHeight);
+                ruledBg.style.height = finalHeight + 'px';
+                if (activeContent.id === 'content-script') {
+                    codeInput.style.height = 'auto';
+                    codeInput.style.height = finalHeight + 'px';
+                }
+            }
+        };
+
+        codeInput.addEventListener('input', updateEditorState);
+        window.addEventListener('resize', updateEditorState);
+        window.addEventListener('load', () => {
+            updateEditorState();
+            switchTab('script');
+        });
+
+        document.getElementById('runBtn').addEventListener('click', () => {
+            const results = interpreter.execute(codeInput.value);
+            outputLog.innerHTML = "";
+            results.forEach(log => {
+                const div = document.createElement('div');
+                div.className = "log-entry" + (log.isError ? " log-error" : "");
+                div.textContent = (log.isError ? "" : "✍️ ") + log.text;
+                outputLog.appendChild(div);
+            });
+            switchTab('log');
+            logCountBadge.textContent = results.length;
+            logCountBadge.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
