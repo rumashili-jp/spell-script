@@ -220,23 +220,6 @@
                     <div class="editor-container">
                         <div id="line-numbers" class="line-numbers"></div>
                         <textarea id="codeInput" spellcheck="false" placeholder="ここにスクリプトを書いてね...">
-// 言語名：Spell-Script (スペル・スクリプト)
-// 変数参照の { } が不要になり、数字から始まる変数名は禁止されました。
-
-SETVAR("i", 1)
-
-WHILE(i <= 15)
-  IF(i % 3 == 0 && i % 5 == 0)
-    LOG("FizzBuzz")
-  ELIF(i % 3 == 0)
-    LOG("Fizz")
-  ELIF(i % 5 == 0)
-    LOG("Buzz")
-  ELSE
-    LOG(i)
-  IFEND
-  SETVAR("i", i + 1)
-WHILEEND
                         </textarea>
                     </div>
                 </div>
@@ -310,10 +293,6 @@ WHILEEND
                 <div class="mt-10 p-6 bg-[#8b7d6b]/10 border border-[#d1c7b7] rounded-xl">
                     <h4 class="text-center font-bold text-[#5d544b] mb-4 text-base">🚀 一流の魔法使いへの近道！</h4>
                     <div class="space-y-4 text-xs leading-relaxed text-[#5d544b]">
-                        <div class="flex gap-2">
-                            <span class="text-lg">💡</span>
-                            <p><strong>変数の { } はもう過去の遺物！</strong><br>昔のSpell-Scriptでは変数を使う時に `{体力}` と書く必要がありましたが、今はそのまま `体力` と書くだけで魔法が発動します。シンプルが一番！</p>
-                        </div>
                         <div class="flex gap-2">
                             <span class="text-lg">📐</span>
                             <p><strong>インデントで見やすく！</strong><br>`IF` や `WHILE` の中身をスペースで少し右にずらす（インデント）と、魔法の構造が一目でわかるようになりますよ。</p>
