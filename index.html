@@ -182,6 +182,8 @@
             font-size: 0.9rem;
             color: #c2410c;
             font-weight: bold;
+            /* Prevent ligatures that might merge characters */
+            font-variant-ligatures: none;
         }
         .example-block {
             background: #f1f5f9;
@@ -192,6 +194,7 @@
             font-size: 0.8rem;
             white-space: pre-wrap;
             color: #475569;
+            font-variant-ligatures: none;
         }
         .jump-nav {
             background: #f4f1e6;
@@ -285,46 +288,52 @@ log("Hello!")</textarea>
                     </div>
                     <div id="section-intro" class="help-section">
                         <h4>🌱 1. プログラミングってなーに？</h4>
-                        <p class="text-sm mb-4">プログラミングは、コンピュータへの「おねがいごと」を紙に書くようなものだよ。この「Spell-Script」では、あなたが書いた1行1行が「魔法の呪文」になって、コンピュータがそれを順番に実行してくれるんだ。間違えても爆発したりしないから、安心して色々な呪文を試してみてね！</p>
+                        <p class="text-sm mb-4">プログラミングは、コンピュータへの「おねがいごと」を紙に書くようなものよ。この「Spell-Script」では、あなたが書いた1行1行が「魔法の呪文」になって、コンピュータがそれを順番に実行してくれるの。間違えても爆発したりしないから、安心して色々な呪文を試してみてね！</p>
                     </div>
                     <div id="section-basics" class="help-section">
                         <h4>✨ 2. これだけは知っておきたい基本</h4>
                         <div class="space-y-4 text-sm">
                             <div class="p-4 bg-white/50 rounded border border-[#d1c7b7]">
                                 <p class="font-bold text-[#8b7d6b] mb-1">💬 文字を表示する (log)</p>
-                                <p>コンピュータに何かしゃべらせたい時は <span class="code-snippet">log("こんにちは")</span> と書こう。文字は必ず <span class="code-snippet">"</span> (ダブルクォーテーション)で囲むのがルールだよ。</p>
+                                <p>コンピュータに何かしゃべらせたい時は <span class="code-snippet">log("こんにちは")</span> と書きましょう。文字は必ず <span class="code-snippet">"</span> (ダブルクォーテーション)で囲むのがルールよ。</p>
                             </div>
                             <div class="p-4 bg-white/50 rounded border border-[#d1c7b7]">
                                 <p class="font-bold text-[#8b7d6b] mb-1">📦 データをしまう箱 (変数/setvar)</p>
-                                <p><span class="code-snippet">setvar("なまえ", "アリス")</span> と書くと、「なまえ」という名前の箱にデータをしまっておけるよ。後で <span class="code-snippet">log(なまえ)</span> と書けば、中身を取り出せるんだ。</p>
+                                <p><span class="code-snippet">setvar("なまえ", "アリス")</span> と書くと、「なまえ」という名前の箱にデータをしまっておけるわ。後で <span class="code-snippet">log(なまえ)</span> と書けば、中身を取り出せるの。</p>
                             </div>
                         </div>
                     </div>
                     <div id="section-operators" class="help-section">
                         <h4>⚡ 3. 魔法の記号（演算子）</h4>
-                        <p class="text-sm mb-2">数字を計算したり、状態を比べたりするための大切な記号たちだよ。</p>
+                        <p class="text-sm mb-2">数字を計算したり、状態を比べたりするための大切な記号たちよ。</p>
                         <ul class="list-disc ml-6 text-sm space-y-1 mb-4">
                             <li><span class="code-snippet">+</span> <span class="code-snippet">-</span> <span class="code-snippet">*</span> <span class="code-snippet">/</span> ： 足し算、引き算、掛け算、割り算。</li>
-                            <li><span class="code-snippet">==</span>　<span class="code-snippet">!=</span> ： 左右が同じか/違うかどうか。</li>
-                            <li><span class="code-snippet">></span> <span class="code-snippet"><</span> <span class="code-snippet">>=</span> <span class="code-snippet"><=</span> ： どちらが大きいか比べる。</li>
+                            <li><span class="code-snippet">==</span> ： 左右が同じかどうか。</li>
+                            <li><span class="code-snippet">!=</span> ： 左右が違うかどうか。</li>
+                            <li><span class="code-snippet">&gt;</span> <span class="code-snippet">&lt;</span> ： どちらが大きいか比べる。</li>
+                            <li><span class="code-snippet">&gt;=</span> <span class="code-snippet">&lt;=</span> ： 以上・以下。</li>
                         </ul>
                         <div class="example-block">setvar("total", 10 + 20)
-log(total) // 30 と表示されるよ</div>
+log(total) // 30 と表示されるわ
+
+if(total >= 30)
+  log("合格！")
+ifend</div>
                     </div>
                     <div id="section-commands" class="help-section">
                         <h4>🪄 4. 魔法の言葉（命令）の使いかた</h4>
                         <div class="space-y-4 text-sm">
-                             <p>呪文の流れをコントロールするための特別な命令だよ。必ず最後は「エンド」で閉じるのを忘れないでね。</p>
+                             <p>呪文の流れをコントロールするための特別な命令よ。必ず最後は「エンド」で閉じるのを忘れないでね。</p>
                              <div class="p-4 bg-white/50 rounded border border-[#d1c7b7]">
                                 <p class="font-bold text-[#8b7d6b] mb-1">分岐の魔法 (if / ifend)</p>
-                                <p>条件が合っている時だけ中身を実行するよ。</p>
+                                <p>条件が合っている時だけ中身を実行するわ。</p>
                                 <div class="example-block">if(hp < 20)
   log("ピンチ！")
 ifend</div>
                              </div>
                              <div class="p-4 bg-white/50 rounded border border-[#d1c7b7]">
                                 <p class="font-bold text-[#8b7d6b] mb-1">繰り返しの儀式 (while / whileend)</p>
-                                <p>条件が合っている間、ずっと中身を繰り返すよ。</p>
+                                <p>条件が合っている間、ずっと中身を繰り返すわ。</p>
                                 <div class="example-block">setvar("n", 1)
 while(n <= 3)
   log(n + "回目！")
@@ -333,9 +342,10 @@ whileend</div>
                              </div>
                              <div class="p-4 bg-white/50 rounded border border-[#d1c7b7]">
                                 <p class="font-bold text-[#8b7d6b] mb-1">オリジナルの魔法 (func / funcend)</p>
-                                <p>一連の動きを「新しい呪文」として登録できるんだ。登録した後は、名前を呼ぶだけで実行できるんだよ！</p>
+                                <p>一連の動きを「新しい呪文」として登録できるわ。登録した後は、名前を呼ぶだけで実行できるの！</p>
                                 <div class="example-block">func fire()
   log("メラメラ...")
+  log("Burn!!")
 funcend
 
 fire() // ここで呪文を呼び出す</div>
@@ -345,9 +355,9 @@ fire() // ここで呪文を呼び出す</div>
                     <div id="section-tips" class="help-section">
                         <h4>💡 5. 上達のコツ</h4>
                         <ul class="list-disc ml-6 text-sm space-y-2">
-                            <li><strong>// コメントを活用して：</strong> <span class="code-snippet">//</span> の後はメモ書きとして無視されるよ。自分用のメモを残しておくと読みやすいよ。</li>
-                            <li><strong>1つずつ実行して：</strong> 一気にたくさん書かずに、少し書いたら「実行」して動きを確かめるのが一番の近道だよ。</li>
-                            <li><strong>エラーを恐れないで：</strong> 赤い文字が出たら、それはコンピュータからの「ヒント」だよ。カッコの閉じ忘れや、綴りの間違いがないか見てみてね。</li>
+                            <li><strong>// コメントを活用して：</strong> <span class="code-snippet">//</span> の後はメモ書きとして無視されるわ。自分用のメモを残しておくと読みやすいわよ。</li>
+                            <li><strong>1つずつ実行して：</strong> 一気にたくさん書かずに、少し書いたら「実行」して動きを確かめるのが一番の近道よ。</li>
+                            <li><strong>エラーを恐れないで：</strong> 赤い文字が出たら、それはコンピュータからの「ヒント」よ。カッコの閉じ忘れや、綴りの間違いがないか見てみてね。</li>
                         </ul>
                     </div>
                 </div>
@@ -360,7 +370,7 @@ fire() // ここで呪文を呼び出す</div>
         </div>
 
         <div id="quest-success" class="hidden mt-4 p-4 bg-green-100 text-green-700 border border-green-200 rounded-lg text-center font-bold animate-bounce">
-            🎊 クエストクリア！素晴らしい！
+            🎊 クエストクリア！素晴らしいわ！
         </div>
     </div>
 
