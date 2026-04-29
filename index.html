@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Note-Spell Interpreter</title>
+    <title>Spell-Script Interpreter</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@400;500&family=Yusei+Magic&family=Fira+Code&display=swap" rel="stylesheet">
     <style>
@@ -220,13 +220,22 @@
                     <div class="editor-container">
                         <div id="line-numbers" class="line-numbers"></div>
                         <textarea id="codeInput" spellcheck="false" placeholder="ここにスクリプトを書いてね...">
-// 言語名：Note-Spell (ノート・スペル)
-LOG("✨ Note-Spellの世界へようこそ")
+// FizzBuzzに挑戦！
 
-// 変数に名前を保存するよ
-SETVAR("name", "見習い魔法使い")
+SETVAR("i", 1)
 
-LOG({name} + "の修行がはじまった！")
+WHILE({i} <= 15)
+  IF({i} % 3 == 0 && {i} % 5 == 0)
+    LOG("FizzBuzz")
+  ELIF({i} % 3 == 0)
+    LOG("Fizz")
+  ELIF({i} % 5 == 0)
+    LOG("Buzz")
+  ELSE
+    LOG({i})
+  IFEND
+  SETVAR("i", {i} + 1)
+WHILEEND
                         </textarea>
                     </div>
                 </div>
@@ -246,7 +255,7 @@ LOG({name} + "の修行がはじまった！")
             </div>
 
             <div id="content-help" class="tab-content hidden h-full plain-content p-8 text-slate-700 leading-relaxed">
-                <h3 class="text-2xl font-bold border-b-2 border-[#d1c7b7] mb-6 pb-2 text-[#5d544b] text-center">📔 言語：Note-Spell 書き方事典</h3>
+                <h3 class="text-2xl font-bold border-b-2 border-[#d1c7b7] mb-6 pb-2 text-[#5d544b] text-center">📔 言語：Spell-Script 書き方事典</h3>
                 
                 <div class="help-section">
                     <h4>💎 1. 書き方の基本ルール</h4>
@@ -267,7 +276,7 @@ LOG({name} + "の修行がはじまった！")
                             <tr><th>種類</th><th>記号</th><th>意味</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>計算</td><td>+ , - , * , /</td><td>足す、引く、掛ける、割る</td></tr>
+                            <tr><td>計算</td><td>+ , - , * , / , %</td><td>足す、引く、掛ける、割る、余り</td></tr>
                             <tr><td>比較</td><td>> , < , >= , <=</td><td>大きい、小さい、以上、以下</td></tr>
                             <tr><td>一致</td><td>== , !=</td><td>等しい、等しくない</td></tr>
                             <tr><td>論理</td><td>&& , ||</td><td>かつ、または</td></tr>
@@ -287,9 +296,9 @@ LOG({name} + "の修行がはじまった！")
                             <p class="pl-4">Logタブに結果を書き出します。計算結果も出せるよ！<br>例: <span class="code-snippet">LOG("合計は " + {合計})</span></p>
                         </div>
                         <div>
-                            <p class="font-bold mb-1">● IF(条件) 〜 IFEND</p>
-                            <p class="pl-4">もし条件が合っていたら、中身を1回だけ実行します。<br>
-                            例: <span class="code-snippet">IF({体力} == 0) LOG("ゲームオーバー") IFEND</span></p>
+                            <p class="font-bold mb-1">● IF(条件) 〜 ELIF / ELSE 〜 IFEND</p>
+                            <p class="pl-4">条件に合わせて処理を分けます。<br>
+                            例: <span class="code-snippet">IF({A} > 10) ... ELSE ... IFEND</span></p>
                         </div>
                         <div>
                             <p class="font-bold mb-1">● WHILE(条件) 〜 WHILEEND</p>
@@ -312,7 +321,7 @@ LOG({name} + "の修行がはじまった！")
         </div>
 
         <div class="mt-4 text-center text-[10px] text-slate-400">
-            Note-Spell Interpreter - Beginner Edition
+            Spell-Script Interpreter - Beginner Edition
         </div>
     </div>
 
@@ -389,14 +398,19 @@ LOG({name} + "の修行がはじまった！")
                     const line = lines[j];
                     if (line.startsWith("IF(")) depth++;
                     if (line.startsWith("IFEND")) depth--;
-                    if (depth === 1 && (line.startsWith("ELIF(") || line.startsWith("ELSE"))) {
-                        const condMatch = lines[lastKeywordIdx].match(/\((.+)\)/);
-                        blocks.push({ cond: condMatch ? condMatch[1] : "true", start: lastKeywordIdx + 1, end: j - 1 });
-                        lastKeywordIdx = j;
+                    
+                    if (depth === 1) {
+                        if (line.startsWith("ELIF(") || line.startsWith("ELSE")) {
+                            const condPart = lines[lastKeywordIdx].match(/\((.+)\)/);
+                            blocks.push({ cond: condPart ? condPart[1] : "true", start: lastKeywordIdx + 1, end: j - 1 });
+                            lastKeywordIdx = j;
+                        }
                     }
+                    
                     if (depth === 0 && line.startsWith("IFEND")) {
-                        const condMatch = lines[lastKeywordIdx].match(/\((.+)\)/);
-                        blocks.push({ cond: condMatch ? condMatch[1] : "true", start: lastKeywordIdx + 1, end: j - 1 });
+                        const condPart = lines[lastKeywordIdx].match(/\((.+)\)/);
+                        blocks.push({ cond: condPart ? condPart[1] : "true", start: lastKeywordIdx + 1, end: j - 1 });
+                        
                         for (let block of blocks) {
                             if (this.evaluateExpression(block.cond)) {
                                 this.runBlock(lines.slice(block.start, block.end + 1), offset + block.start);
@@ -421,7 +435,7 @@ LOG({name} + "の修行がはじまった！")
                     const blockContent = lines.slice(startIdx + 1, endIdx);
                     let safety = 0;
                     while (this.evaluateExpression(condition)) {
-                        if (safety >= this.maxIterations) throw new Error("無限ループ！");
+                        if (safety >= this.maxIterations) throw new Error("無限ループ！安全のために止めたよ");
                         this.runBlock(blockContent, offset + startIdx + 1);
                         safety++;
                     }
