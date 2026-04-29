@@ -220,21 +220,22 @@
                     <div class="editor-container">
                         <div id="line-numbers" class="line-numbers"></div>
                         <textarea id="codeInput" spellcheck="false" placeholder="ここにスクリプトを書いてね...">
-// FizzBuzzに挑戦！
+// 言語名：Spell-Script (スペル・スクリプト)
+// 変数参照の { } が不要になり、数字から始まる変数名は禁止されました。
 
 SETVAR("i", 1)
 
-WHILE({i} <= 15)
-  IF({i} % 3 == 0 && {i} % 5 == 0)
+WHILE(i <= 15)
+  IF(i % 3 == 0 && i % 5 == 0)
     LOG("FizzBuzz")
-  ELIF({i} % 3 == 0)
+  ELIF(i % 3 == 0)
     LOG("Fizz")
-  ELIF({i} % 5 == 0)
+  ELIF(i % 5 == 0)
     LOG("Buzz")
   ELSE
-    LOG({i})
+    LOG(i)
   IFEND
-  SETVAR("i", {i} + 1)
+  SETVAR("i", i + 1)
 WHILEEND
                         </textarea>
                     </div>
@@ -261,16 +262,16 @@ WHILEEND
                     <h4>💎 1. 書き方の基本ルール</h4>
                     <ul class="space-y-3 text-sm list-disc pl-5">
                         <li><strong>数字</strong>：そのまま書きます。 (例: <span class="code-snippet">100</span>)</li>
-                        <li><strong>文字列（言葉）</strong>：ダブルクォーテーション <span class="code-snippet">"</span> で囲みます。 (例: <span class="code-snippet">"こんにちは"</span>)</li>
-                        <li><strong>変数（箱）</strong>：中身を使いたいときは中カッコ <span class="code-snippet">{ }</span> で囲みます。 (例: <span class="code-snippet">{体力}</span>)</li>
-                        <li><strong>コメントアウト（自分用のメモ）</strong>： <span class="code-snippet">//</span> を書くと、その行の右側はプログラムとして無視されます。
-                            <p class="mt-1 text-xs text-slate-500">例: <span class="code-snippet">// ここはメモです</span></p>
+                        <li><strong>文字列</strong>：ダブルクォーテーション <span class="code-snippet">"</span> で囲みます。 (例: <span class="code-snippet">"こんにちは"</span>)</li>
+                        <li><strong>変数</strong>：名前をそのまま書きます。 (例: <span class="code-snippet">体力</span>)
+                            <p class="mt-1 text-xs text-blue-600 font-bold">※変数の名前は、必ず「文字（または _ や $）」から始めてください。数字から始めることはできません。</p>
                         </li>
+                        <li><strong>コメントアウト</strong>： <span class="code-snippet">//</span> の右側は無視されます。</li>
                     </ul>
                 </div>
 
                 <div class="help-section">
-                    <h4>🧮 2. 演算子（計算とくらべる記号）</h4>
+                    <h4>🧮 2. 演算子</h4>
                     <table class="help-table">
                         <thead>
                             <tr><th>種類</th><th>記号</th><th>意味</th></tr>
@@ -289,28 +290,43 @@ WHILEEND
                     <div class="space-y-6 text-sm">
                         <div>
                             <p class="font-bold mb-1">● SETVAR("変数名", 値)</p>
-                            <p class="pl-4">変数という箱に値を入れます。箱の名前も <span class="code-snippet">""</span> で囲んでね。<br>例: <span class="code-snippet">SETVAR("名前", "ポチ")</span></p>
+                            <p class="pl-4">変数に値を入れます。名前はダブルクォーテーションで囲みます。<br>例: <span class="code-snippet">SETVAR("体力", 100)</span></p>
                         </div>
                         <div>
                             <p class="font-bold mb-1">● LOG(内容)</p>
-                            <p class="pl-4">Logタブに結果を書き出します。計算結果も出せるよ！<br>例: <span class="code-snippet">LOG("合計は " + {合計})</span></p>
+                            <p class="pl-4">Logタブに表示します。変数名を書くと中身が表示されます。<br>例: <span class="code-snippet">LOG("残りの体力: " + 体力)</span></p>
                         </div>
                         <div>
                             <p class="font-bold mb-1">● IF(条件) 〜 ELIF / ELSE 〜 IFEND</p>
-                            <p class="pl-4">条件に合わせて処理を分けます。<br>
-                            例: <span class="code-snippet">IF({A} > 10) ... ELSE ... IFEND</span></p>
+                            <p class="pl-4">条件分岐。<br>例: <span class="code-snippet">IF(体力 <= 0) LOG("ゲームオーバー") IFEND</span></p>
                         </div>
                         <div>
                             <p class="font-bold mb-1">● WHILE(条件) 〜 WHILEEND</p>
-                            <p class="pl-4">条件が合っている間、中身をずっと繰り返します。<br>
-                            例: <span class="code-snippet">WHILE({回数} < 3) ... WHILEEND</span></p>
+                            <p class="pl-4">ループ。<br>例: <span class="code-snippet">WHILE(i < 5) ... SETVAR("i", i + 1) WHILEEND</span></p>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-10 p-6 bg-[#8b7d6b]/5 border border-[#d1c7b7] rounded-xl text-xs text-slate-500 italic">
-                    <p>💡 プログラムを書くコツ：</p>
-                    <p>一気にたくさん書かずに、少し書いては「実行する」ボタンを押して、思った通りに動くか確認するのが上達の近道だよ！</p>
+                <div class="mt-10 p-6 bg-[#8b7d6b]/10 border border-[#d1c7b7] rounded-xl">
+                    <h4 class="text-center font-bold text-[#5d544b] mb-4 text-base">🚀 一流の魔法使いへの近道！</h4>
+                    <div class="space-y-4 text-xs leading-relaxed text-[#5d544b]">
+                        <div class="flex gap-2">
+                            <span class="text-lg">💡</span>
+                            <p><strong>変数の { } はもう過去の遺物！</strong><br>昔のSpell-Scriptでは変数を使う時に `{体力}` と書く必要がありましたが、今はそのまま `体力` と書くだけで魔法が発動します。シンプルが一番！</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="text-lg">📐</span>
+                            <p><strong>インデントで見やすく！</strong><br>`IF` や `WHILE` の中身をスペースで少し右にずらす（インデント）と、魔法の構造が一目でわかるようになりますよ。</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="text-lg">🏷️</span>
+                            <p><strong>分かりやすい名前をつけよう！</strong><br>`a` や `b` よりも `攻撃力` や `残り回数` のように、役割がわかる名前にすると後で見返したときに混乱しません。</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="text-lg">🔁</span>
+                            <p><strong>小さなステップで確認！</strong><br>大きな魔法を一度に書くのではなく、1行書くたびに `LOG` で中身を確認するのが、バグ（呪い）を避けるコツです。</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -333,23 +349,35 @@ WHILEEND
                 this.maxIterations = 1000;
                 this.currentLine = 0;
             }
-            log(msg, isError = false) { this.logs.push({ text: msg, isError: isError }); }
-            replaceVariables(expression) {
-                if (typeof expression !== 'string') return expression;
-                return expression.replace(/\{(\w+)\}/g, (_, name) => {
-                    if (this.variables.hasOwnProperty(name)) {
-                        const val = this.variables[name];
-                        return typeof val === 'string' ? `"${val}"` : val;
-                    }
-                    throw new Error(`変数 '${name}' が見つからないよ`);
-                });
+
+            log(msg, isError = false) { 
+                this.logs.push({ text: String(msg), isError: isError }); 
             }
+            
+            validateVariableName(name) {
+                if (!name) throw new Error("変数名が空だよ");
+                if (/^[0-9]/.test(name)) {
+                    throw new Error(`変数名 '${name}' は数字から始めてはいけないよ`);
+                }
+                if (!/^[a-zA-Z_$_\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf]/.test(name)) {
+                    throw new Error(`変数名 '${name}' に使えない文字が入っているよ`);
+                }
+            }
+
             evaluateExpression(expr) {
                 try {
-                    const processed = this.replaceVariables(expr);
-                    return new Function(`return (${processed})`)();
-                } catch (e) { throw new Error(e.message); }
+                    const keys = Object.keys(this.variables);
+                    const values = Object.values(this.variables);
+                    const fn = new Function(...keys, `return (${expr})`);
+                    return fn(...values);
+                } catch (e) { 
+                    if (e instanceof ReferenceError) {
+                        throw new Error(`存在しない名前だよ: ${e.message.split(' ')[0]}`);
+                    }
+                    throw new Error(`計算エラー: ${e.message}`); 
+                }
             }
+
             execute(code) {
                 this.variables = {};
                 this.logs = [];
@@ -361,22 +389,33 @@ WHILEEND
                 }
                 return this.logs;
             }
+
             runBlock(lines, offset) {
                 let i = 0;
                 while (i < lines.length) {
                     this.currentLine = offset + i;
                     const line = lines[i];
+                    
                     if (!line || line.startsWith("//")) { i++; continue; }
+                    
                     try {
                         if (line.startsWith("SETVAR(")) {
-                            const match = line.match(/SETVAR\("?(\w+)"?,\s*(.+)\)/);
-                            if (match) this.variables[match[1]] = this.evaluateExpression(match[2]);
-                            else throw new Error("SETVARの書き方がおかしいみたい");
+                            const match = line.match(/^SETVAR\s*\(\s*["']?([^"'\s,]+)["']?\s*,\s*(.+)\s*\)$/);
+                            if (match) {
+                                const varName = match[1];
+                                this.validateVariableName(varName);
+                                this.variables[varName] = this.evaluateExpression(match[2]);
+                            } else {
+                                throw new Error("SETVARの書き方がおかしいみたい");
+                            }
                             i++;
                         } else if (line.startsWith("LOG(")) {
-                            const match = line.match(/LOG\((.+)\)/);
-                            if (match) this.log(this.evaluateExpression(match[1]));
-                            else throw new Error("LOGの書き方がおかしいみたい");
+                            const match = line.match(/^LOG\s*\((.+)\)$/);
+                            if (match) {
+                                this.log(this.evaluateExpression(match[1]));
+                            } else {
+                                throw new Error("LOGの書き方がおかしいみたい");
+                            }
                             i++;
                         } else if (line.startsWith("IF(")) {
                             const { endIdx } = this.handleIfBlock(lines, i, offset);
@@ -387,13 +426,17 @@ WHILEEND
                         } else if (line.startsWith("WHILEEND") || line.startsWith("IFEND") || line.startsWith("ELSE") || line.startsWith("ELIF")) {
                             i++;
                         } else {
-                            throw new Error("このコマンドは知らないなぁ: " + line.split('(')[0]);
+                            throw new Error(`知らない魔法だよ: ${line.split('(')[0]}`);
                         }
                     } catch (e) { throw e; }
                 }
             }
+
             handleIfBlock(lines, startIdx, offset) {
-                let depth = 0, lastKeywordIdx = startIdx, blocks = [];
+                let depth = 0;
+                let lastKeywordIdx = startIdx;
+                let blocks = [];
+                
                 for (let j = startIdx; j < lines.length; j++) {
                     const line = lines[j];
                     if (line.startsWith("IF(")) depth++;
@@ -401,47 +444,67 @@ WHILEEND
                     
                     if (depth === 1) {
                         if (line.startsWith("ELIF(") || line.startsWith("ELSE")) {
-                            const condPart = lines[lastKeywordIdx].match(/\((.+)\)/);
-                            blocks.push({ cond: condPart ? condPart[1] : "true", start: lastKeywordIdx + 1, end: j - 1 });
+                            const prevLine = lines[lastKeywordIdx];
+                            let cond = "false";
+                            if (prevLine.startsWith("IF(") || prevLine.startsWith("ELIF(")) {
+                                const m = prevLine.match(/\((.+)\)/);
+                                cond = m ? m[1] : "false";
+                            } else if (prevLine.startsWith("ELSE")) {
+                                cond = "true";
+                            }
+                            blocks.push({ cond, start: lastKeywordIdx + 1, end: j - 1 });
                             lastKeywordIdx = j;
                         }
                     }
                     
                     if (depth === 0 && line.startsWith("IFEND")) {
-                        const condPart = lines[lastKeywordIdx].match(/\((.+)\)/);
-                        blocks.push({ cond: condPart ? condPart[1] : "true", start: lastKeywordIdx + 1, end: j - 1 });
+                        const prevLine = lines[lastKeywordIdx];
+                        let cond = "false";
+                        if (prevLine.startsWith("IF(") || prevLine.startsWith("ELIF(")) {
+                            const m = prevLine.match(/\((.+)\)/);
+                            cond = m ? m[1] : "false";
+                        } else if (prevLine.startsWith("ELSE")) {
+                            cond = "true";
+                        }
+                        blocks.push({ cond, start: lastKeywordIdx + 1, end: j - 1 });
                         
                         for (let block of blocks) {
                             if (this.evaluateExpression(block.cond)) {
-                                this.runBlock(lines.slice(block.start, block.end + 1), offset + block.start);
+                                if (block.start <= block.end) {
+                                    this.runBlock(lines.slice(block.start, block.end + 1), offset + block.start);
+                                }
                                 break;
                             }
                         }
                         return { endIdx: j };
                     }
                 }
-                throw new Error("IF文を閉じ忘れてない？");
+                throw new Error("IF文を IFEND で閉じ忘れてない？");
             }
+
             handleWhileBlock(lines, startIdx, offset) {
                 const condMatch = lines[startIdx].match(/WHILE\((.+)\)/);
                 const condition = condMatch ? condMatch[1] : "false";
-                let depth = 0, endIdx = -1;
+                let depth = 0;
+                let endIdx = -1;
+                
                 for (let j = startIdx; j < lines.length; j++) {
                     if (lines[j].startsWith("WHILE(")) depth++;
                     if (lines[j].startsWith("WHILEEND")) depth--;
                     if (depth === 0) { endIdx = j; break; }
                 }
+                
                 if (endIdx !== -1) {
                     const blockContent = lines.slice(startIdx + 1, endIdx);
                     let safety = 0;
                     while (this.evaluateExpression(condition)) {
-                        if (safety >= this.maxIterations) throw new Error("無限ループ！安全のために止めたよ");
+                        if (safety >= this.maxIterations) throw new Error("無限ループ！安全のために停止したよ");
                         this.runBlock(blockContent, offset + startIdx + 1);
                         safety++;
                     }
                     return { endIdx };
                 }
-                throw new Error("WHILE文を閉じ忘れてない？");
+                throw new Error("WHILE文を WHILEEND で閉じ忘れてない？");
             }
         }
 
@@ -485,6 +548,7 @@ WHILEEND
                 nums += i + "<br>";
             }
             lineNumbers.innerHTML = nums;
+            
             const activeContent = document.querySelector('.tab-content:not(.hidden)');
             if (activeContent) {
                 const scrollHeight = activeContent.scrollHeight;
@@ -508,12 +572,16 @@ WHILEEND
         document.getElementById('runBtn').addEventListener('click', () => {
             const results = interpreter.execute(codeInput.value);
             outputLog.innerHTML = "";
-            results.forEach(log => {
-                const div = document.createElement('div');
-                div.className = "log-entry" + (log.isError ? " log-error" : "");
-                div.textContent = (log.isError ? "" : "✍️ ") + log.text;
-                outputLog.appendChild(div);
-            });
+            if (results.length === 0) {
+                outputLog.innerHTML = '<div class="log-entry text-slate-400 italic border-none">何も表示されなかったよ。</div>';
+            } else {
+                results.forEach(log => {
+                    const div = document.createElement('div');
+                    div.className = "log-entry" + (log.isError ? " log-error" : "");
+                    div.textContent = (log.isError ? "" : "✍️ ") + log.text;
+                    outputLog.appendChild(div);
+                });
+            }
             switchTab('log');
             logCountBadge.textContent = results.length;
             logCountBadge.classList.remove('hidden');
